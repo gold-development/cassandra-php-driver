@@ -234,9 +234,7 @@ PHP_METHOD(TypeUserType, create)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_value, 0, ZEND_RETURN_VALUE, 0)
-  ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
+PHP7TO8_ARG_INFO_VARIADIC(arginfo_value, value)
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_name, 0, ZEND_RETURN_VALUE, 1)
   ZEND_ARG_INFO(0, name)
@@ -246,13 +244,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_keyspace, 0, ZEND_RETURN_VALUE, 1)
   ZEND_ARG_INFO(0, keyspace)
 ZEND_END_ARG_INFO()
 
+PHP7TO8_ARG_INFO_STRING_RETURN(arginfo_string_return)
+
 static zend_function_entry php_driver_type_user_type_methods[] = {
   PHP_ME(TypeUserType, __construct,  arginfo_none,     ZEND_ACC_PRIVATE)
   PHP_ME(TypeUserType, withName,     arginfo_name,     ZEND_ACC_PUBLIC)
   PHP_ME(TypeUserType, name,         arginfo_none,     ZEND_ACC_PUBLIC)
   PHP_ME(TypeUserType, withKeyspace, arginfo_keyspace, ZEND_ACC_PUBLIC)
   PHP_ME(TypeUserType, keyspace,     arginfo_none,     ZEND_ACC_PUBLIC)
-  PHP_ME(TypeUserType, __toString,   arginfo_none,     ZEND_ACC_PUBLIC)
+  PHP_ME(TypeUserType, __toString,   arginfo_string_return,     ZEND_ACC_PUBLIC)
   PHP_ME(TypeUserType, types,        arginfo_none,     ZEND_ACC_PUBLIC)
   PHP_ME(TypeUserType, create,       arginfo_value,    ZEND_ACC_PUBLIC)
   PHP_FE_END
@@ -261,7 +261,7 @@ static zend_function_entry php_driver_type_user_type_methods[] = {
 static zend_object_handlers php_driver_type_user_type_handlers;
 
 static HashTable *
-php_driver_type_user_type_gc(zval *object, php5to7_zval_gc table, int *n TSRMLS_DC)
+php_driver_type_user_type_gc(php7to8_object *object, php5to7_zval_gc table, int *n TSRMLS_DC)
 {
   *table = NULL;
   *n = 0;
@@ -269,11 +269,15 @@ php_driver_type_user_type_gc(zval *object, php5to7_zval_gc table, int *n TSRMLS_
 }
 
 static HashTable *
-php_driver_type_user_type_properties(zval *object TSRMLS_DC)
+php_driver_type_user_type_properties(php7to8_object *object TSRMLS_DC)
 {
   php5to7_zval types;
 
+#if PHP_MAJOR_VERSION >= 8
+  php_driver_type *self  = PHP5TO7_ZEND_OBJECT_GET(type, object);
+#else
   php_driver_type *self  = PHP_DRIVER_GET_TYPE(object);
+#endif
   HashTable      *props = zend_std_get_properties(object TSRMLS_CC);
 
   PHP5TO7_ZVAL_MAYBE_MAKE(types);
@@ -289,6 +293,7 @@ php_driver_type_user_type_properties(zval *object TSRMLS_DC)
 static int
 php_driver_type_user_type_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 {
+  PHP7TO8_MAYBE_COMPARE_OBJECTS_FALLBACK(obj1, obj2);
   php_driver_type* type1 = PHP_DRIVER_GET_TYPE(obj1);
   php_driver_type* type2 = PHP_DRIVER_GET_TYPE(obj2);
 
@@ -333,7 +338,7 @@ void php_driver_define_TypeUserType(TSRMLS_D)
 #if PHP_VERSION_ID >= 50400
   php_driver_type_user_type_handlers.get_gc          = php_driver_type_user_type_gc;
 #endif
-  php_driver_type_user_type_handlers.compare_objects = php_driver_type_user_type_compare;
+  PHP7TO8_COMPARE(php_driver_type_user_type_handlers, php_driver_type_user_type_compare);
   php_driver_type_user_type_ce->ce_flags     |= PHP5TO7_ZEND_ACC_FINAL;
   php_driver_type_user_type_ce->create_object = php_driver_type_user_type_new;
 }

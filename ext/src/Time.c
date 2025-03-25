@@ -158,7 +158,12 @@ PHP_METHOD(Time, fromDateTime)
     return;
   }
 
-  zend_call_method_with_0_params(PHP5TO7_ZVAL_MAYBE_ADDR_OF(zdatetime),
+  zend_call_method_with_0_params(
+#if PHP_MAJOR_VERSION >= 8
+                                 Z_OBJ_P(zdatetime),
+#else
+                                 PHP5TO7_ZVAL_MAYBE_ADDR_OF(zdatetime),
+#endif
                                  php_date_get_date_ce(),
                                  NULL,
                                  "gettimestamp",
@@ -200,19 +205,21 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_none, 0, ZEND_RETURN_VALUE, 0)
 ZEND_END_ARG_INFO()
 
+PHP7TO8_ARG_INFO_STRING_RETURN(arginfo_string_return)
+
 static zend_function_entry php_driver_time_methods[] = {
   PHP_ME(Time, __construct, arginfo__construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
   PHP_ME(Time, type, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_ME(Time, seconds, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_ME(Time, fromDateTime, arginfo_datetime, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-  PHP_ME(Time, __toString, arginfo_none, ZEND_ACC_PUBLIC)
+  PHP_ME(Time, __toString, arginfo_string_return, ZEND_ACC_PUBLIC)
   PHP_FE_END
 };
 
 static php_driver_value_handlers php_driver_time_handlers;
 
 static HashTable *
-php_driver_time_gc(zval *object, php5to7_zval_gc table, int *n TSRMLS_DC)
+php_driver_time_gc(php7to8_object *object, php5to7_zval_gc table, int *n TSRMLS_DC)
 {
   *table = NULL;
   *n = 0;
@@ -220,12 +227,16 @@ php_driver_time_gc(zval *object, php5to7_zval_gc table, int *n TSRMLS_DC)
 }
 
 static HashTable *
-php_driver_time_properties(zval *object TSRMLS_DC)
+php_driver_time_properties(php7to8_object *object TSRMLS_DC)
 {
   php5to7_zval type;
   php5to7_zval nanoseconds;
 
+#if PHP_MAJOR_VERSION >= 8
+  php_driver_time *self = PHP5TO7_ZEND_OBJECT_GET(time, object);
+#else
   php_driver_time *self = PHP_DRIVER_GET_TIME(object);
+#endif
   HashTable *props = zend_std_get_properties(object TSRMLS_CC);
 
   type = php_driver_type_scalar(CASS_VALUE_TYPE_TIME TSRMLS_CC);
@@ -241,6 +252,7 @@ php_driver_time_properties(zval *object TSRMLS_DC)
 static int
 php_driver_time_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 {
+  PHP7TO8_MAYBE_COMPARE_OBJECTS_FALLBACK(obj1, obj2);
   php_driver_time *time1 = NULL;
   php_driver_time *time2 = NULL;
   if (Z_OBJCE_P(obj1) != Z_OBJCE_P(obj2))
@@ -291,7 +303,7 @@ void php_driver_define_Time(TSRMLS_D)
 #if PHP_VERSION_ID >= 50400
   php_driver_time_handlers.std.get_gc          = php_driver_time_gc;
 #endif
-  php_driver_time_handlers.std.compare_objects = php_driver_time_compare;
+  PHP7TO8_COMPARE(php_driver_time_handlers.std, php_driver_time_compare);
   php_driver_time_ce->ce_flags |= PHP5TO7_ZEND_ACC_FINAL;
   php_driver_time_ce->create_object = php_driver_time_new;
 

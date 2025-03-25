@@ -95,7 +95,7 @@ char *php_driver_duration_to_string(php_driver_duration *duration)
   cass_int32_t final_months = duration->months;
   cass_int32_t final_days = duration->days;
   cass_int64_t final_nanos = duration->nanos;
-  
+
   is_negative = final_months < 0 || final_days < 0 || final_nanos < 0;
   if (final_months < 0)
     final_months = -final_months;
@@ -103,7 +103,7 @@ char *php_driver_duration_to_string(php_driver_duration *duration)
     final_days = -final_days;
   if (final_nanos < 0)
     final_nanos = -final_nanos;
-  
+
   spprintf(&rep, 0, "%s%dmo%dd" LL_FORMAT "ns", is_negative ? "-" : "", final_months, final_days, final_nanos);
   return rep;
 }
@@ -213,23 +213,29 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo__construct, 0, ZEND_RETURN_VALUE, 3)
   ZEND_ARG_INFO(0, nanos)
 ZEND_END_ARG_INFO()
 
+PHP7TO8_ARG_INFO_STRING_RETURN(arginfo_string_return)
+
 static zend_function_entry php_driver_duration_methods[] = {
   PHP_ME(Duration, __construct,  arginfo__construct, ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
   PHP_ME(Duration, type, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_ME(Duration, months, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_ME(Duration, days, arginfo_none, ZEND_ACC_PUBLIC)
   PHP_ME(Duration, nanos, arginfo_none, ZEND_ACC_PUBLIC)
-  PHP_ME(Duration, __toString, arginfo_none, ZEND_ACC_PUBLIC)
+  PHP_ME(Duration, __toString, arginfo_string_return, ZEND_ACC_PUBLIC)
   PHP_FE_END
 };
 
 static php_driver_value_handlers php_driver_duration_handlers;
 
 static HashTable *
-php_driver_duration_properties(zval *object TSRMLS_DC)
+php_driver_duration_properties(php7to8_object *object TSRMLS_DC)
 {
   HashTable *props = zend_std_get_properties(object TSRMLS_CC);
+#if PHP_MAJOR_VERSION >= 8
+  php_driver_duration  *self = PHP5TO7_ZEND_OBJECT_GET(duration, object);
+#else
   php_driver_duration  *self = PHP_DRIVER_GET_DURATION(object);
+#endif
 
   php5to7_zval wrapped_months, wrapped_days, wrapped_nanos;
   PHP5TO7_ZVAL_MAYBE_MAKE(wrapped_months);
@@ -248,6 +254,7 @@ php_driver_duration_properties(zval *object TSRMLS_DC)
 static int
 php_driver_duration_compare(zval *obj1, zval *obj2 TSRMLS_DC)
 {
+  PHP7TO8_MAYBE_COMPARE_OBJECTS_FALLBACK(obj1, obj2);
   php_driver_duration *left, *right;
 
   if (Z_OBJCE_P(obj1) != Z_OBJCE_P(obj2))
@@ -322,7 +329,7 @@ void php_driver_define_Duration(TSRMLS_D)
 
   memcpy(&php_driver_duration_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
   php_driver_duration_handlers.std.get_properties  = php_driver_duration_properties;
-  php_driver_duration_handlers.std.compare_objects = php_driver_duration_compare;
+  PHP7TO8_COMPARE(php_driver_duration_handlers.std, php_driver_duration_compare);
 
   php_driver_duration_handlers.hash_value = php_driver_duration_hash_value;
   php_driver_duration_handlers.std.clone_obj = NULL;
