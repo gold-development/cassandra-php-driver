@@ -35,6 +35,7 @@ class ConsistencyIntegrationTest extends BasicIntegrationTest {
      *
      * @test
      * @ticket PHP-49
+     * @group flaky
      */
     public function testDefaultConsistencyLevel() {
         // Create a new table

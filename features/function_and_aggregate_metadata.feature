@@ -47,11 +47,11 @@ Feature: User-defined Function (UDF) and Aggregate Metadata (UDA)
       Body: return Double.valueOf(Math.log(input.doubleValue()));
       Arguments: array (
         'input' =>
-        Cassandra\Type\Scalar::__set_state(array(
+        \Cassandra\Type\Scalar::__set_state(array(
            'name' => 'double',
         )),
       )
-      ReturnType: Cassandra\Type\Scalar::__set_state(array(
+      ReturnType: \Cassandra\Type\Scalar::__set_state(array(
          'name' => 'double',
       ))
       IsCalledOnNullInput: true
@@ -86,37 +86,37 @@ Feature: User-defined Function (UDF) and Aggregate Metadata (UDA)
       Signature: average(int)
       ArgumentTypes: array (
         0 =>
-        Cassandra\Type\Scalar::__set_state(array(
+        \Cassandra\Type\Scalar::__set_state(array(
            'name' => 'int',
         )),
       )
-      StateType: Cassandra\Type\Tuple::__set_state(array(
+      StateType: \Cassandra\Type\Tuple::__set_state(array(
          'types' =>
         array (
           0 =>
-          Cassandra\Type\Scalar::__set_state(array(
+          \Cassandra\Type\Scalar::__set_state(array(
              'name' => 'int',
           )),
           1 =>
-          Cassandra\Type\Scalar::__set_state(array(
+          \Cassandra\Type\Scalar::__set_state(array(
              'name' => 'bigint',
           )),
         ),
       ))
-      ReturnType: Cassandra\Type\Scalar::__set_state(array(
+      ReturnType: \Cassandra\Type\Scalar::__set_state(array(
          'name' => 'double',
       ))
-      InitialCondition: Cassandra\Tuple::__set_state(array(
+      InitialCondition: \Cassandra\Tuple::__set_state(array(
          'type' =>
-        Cassandra\Type\Tuple::__set_state(array(
+        \Cassandra\Type\Tuple::__set_state(array(
            'types' =>
           array (
             0 =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'int',
             )),
             1 =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'bigint',
             )),
           ),
@@ -125,9 +125,9 @@ Feature: User-defined Function (UDF) and Aggregate Metadata (UDA)
         array (
           0 => 0,
           1 =>
-          Cassandra\Bigint::__set_state(array(
+          \Cassandra\Bigint::__set_state(array(
              'type' =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'bigint',
             )),
              'value' => '0',

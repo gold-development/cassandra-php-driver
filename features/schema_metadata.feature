@@ -285,62 +285,62 @@ Feature: Schema Metadata
     Then its output should contain:
       """
       Name: simplex.type1
-      Type: Cassandra\Type\UserType::__set_state(array(
+      Type: \Cassandra\Type\UserType::__set_state(array(
          'types' =>
         array (
           'a' =>
-          Cassandra\Type\Scalar::__set_state(array(
+          \Cassandra\Type\Scalar::__set_state(array(
              'name' => 'int',
           )),
           'b' =>
-          Cassandra\Type\Scalar::__set_state(array(
+          \Cassandra\Type\Scalar::__set_state(array(
              'name' => 'varchar',
           )),
         ),
       ))
       Name: simplex.type2
-      Type: Cassandra\Type\UserType::__set_state(array(
+      Type: \Cassandra\Type\UserType::__set_state(array(
          'types' =>
         array (
           'a' =>
-          Cassandra\Type\Map::__set_state(array(
+          \Cassandra\Type\Map::__set_state(array(
              'keyType' =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'varchar',
             )),
              'valueType' =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'int',
             )),
           )),
           'b' =>
-          Cassandra\Type\Scalar::__set_state(array(
+          \Cassandra\Type\Scalar::__set_state(array(
              'name' => 'bigint',
           )),
         ),
       ))
       Name: simplex.type3
-      Type: Cassandra\Type\UserType::__set_state(array(
+      Type: \Cassandra\Type\UserType::__set_state(array(
          'types' =>
         array (
           'a' =>
-          Cassandra\Type\Map::__set_state(array(
+          \Cassandra\Type\Map::__set_state(array(
              'keyType' =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'varchar',
             )),
              'valueType' =>
-            Cassandra\Type\Set::__set_state(array(
+            \Cassandra\Type\Set::__set_state(array(
                'valueType' =>
-              Cassandra\Type\Scalar::__set_state(array(
+              \Cassandra\Type\Scalar::__set_state(array(
                  'name' => 'int',
               )),
             )),
           )),
           'b' =>
-          Cassandra\Type\Collection::__set_state(array(
+          \Cassandra\Type\Collection::__set_state(array(
              'valueType' =>
-            Cassandra\Type\Scalar::__set_state(array(
+            \Cassandra\Type\Scalar::__set_state(array(
                'name' => 'uuid',
             )),
           )),
