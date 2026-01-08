@@ -39,7 +39,7 @@ final class ExecutionOptions
      *
      * @see \Cassandra\Session::execute() for valid execution options
      */
-    public function __construct(array $options = null)
+    public function __construct(?array $options = null)
     {
     }
 

@@ -71,7 +71,7 @@ if (PHP_CASSANDRA != "no") {
   if (CHECK_LIB("cassandra_static.lib", "cassandra", PHP_CASSANDRA_CPP_DRIVER) &&
       (PHP_CASSANDRA_CPP_DRIVER_INCLUDE = CHECK_HEADER_ADD_INCLUDE("cassandra.h", "CFLAGS_CASSANDRA", PHP_CASSANDRA_CPP_DRIVER + "/include"))) {
     check_cassandra_cpp_driver_version(PHP_CASSANDRA_CPP_DRIVER_INCLUDE + "/cassandra.h");
-    if (CHECK_LIB("uv.lib", "cassandra", PHP_LIBUV) &&
+    if (CHECK_LIB("libuv.lib", "cassandra", PHP_LIBUV) &&
         CHECK_LIB("iphlpapi.lib", "cassandra") &&
         CHECK_LIB("psapi.lib", "cassandra") &&
         CHECK_LIB("userenv.lib", "cassandra") && // Required for libuv v1.6.0+

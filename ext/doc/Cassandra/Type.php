@@ -303,7 +303,7 @@ abstract class Type implements \Stringable
      *
      * @return \Cassandra\Type The tuple type
      */
-    public static final function tuple(\Cassandra\Type $types = null): \Cassandra\Type
+    public static final function tuple(?\Cassandra\Type $types = null): \Cassandra\Type
     {
     }
 
@@ -323,7 +323,7 @@ abstract class Type implements \Stringable
      *
      * @return \Cassandra\Type The user type
      */
-    public static final function userType(\Cassandra\Type $types = null): \Cassandra\Type
+    public static final function userType(?\Cassandra\Type $types = null): \Cassandra\Type
     {
     }
 }

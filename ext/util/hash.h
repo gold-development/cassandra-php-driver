@@ -51,7 +51,7 @@ struct php_driver_set_entry_ {
 
 unsigned php_driver_value_hash(zval* zvalue TSRMLS_DC);
 int php_driver_value_compare(zval* zvalue1, zval* zvalue2 TSRMLS_DC);
-int php_driver_data_compare(const void* a, const void* b TSRMLS_DC);
+int php_driver_data_compare(Bucket* a, Bucket* b TSRMLS_DC);
 
 unsigned php_driver_mpz_hash(unsigned seed, mpz_t n);
 

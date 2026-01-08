@@ -28,7 +28,7 @@ class IsBootstrappingException extends ServerException
      * @param int $code
      * @param \Exception $previous
      */
-    public function __construct(string $message = '', int $code = 0, \Exception $previous = null)
+    public function __construct(string $message = '', int $code = 0, ?\Exception $previous = null)
     {
     }
 

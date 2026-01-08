@@ -28,7 +28,7 @@ final class Date implements \Stringable, Value
      *
      * @param int $seconds Absolute seconds from epoch (1970, 1, 1), can be negative, defaults to current time.
      */
-    public function __construct(int $seconds = null)
+    public function __construct(?int $seconds = null)
     {
     }
 
@@ -55,7 +55,7 @@ final class Date implements \Stringable, Value
      *
      * @return \DateTime PHP representation
      */
-    public function toDateTime(\Cassandra\Time $time = null): \DateTime
+    public function toDateTime(?\Cassandra\Time $time = null): \DateTime
     {
     }
 

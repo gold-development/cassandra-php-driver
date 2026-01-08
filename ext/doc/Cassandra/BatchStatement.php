@@ -44,7 +44,7 @@ final class BatchStatement implements Statement
      *
      * @param int $type must be one of \Cassandra::BATCH_* (default: \Cassandra::BATCH_LOGGED).
      */
-    public function __construct(int $type = null)
+    public function __construct(?int $type = null)
     {
     }
 

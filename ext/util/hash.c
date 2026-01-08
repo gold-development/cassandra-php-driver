@@ -136,7 +136,7 @@ php_driver_value_compare(zval* zvalue1, zval* zvalue2 TSRMLS_DC) {
   return 1;
 }
 
-int php_driver_data_compare(const void* a, const void* b TSRMLS_DC) {
+int php_driver_data_compare(Bucket* a, Bucket* b TSRMLS_DC) {
   Bucket *f, *s;
   zval *first, *second;
 

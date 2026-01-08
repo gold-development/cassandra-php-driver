@@ -56,7 +56,7 @@ interface Keyspace
      *
      * @param string $name Table name
      *
-     * @return \Cassandra\Table|null Table instance or null
+     * @return \Cassandra\DefaultTable|null Table instance or null
      */
     public function table(string $name);
 
@@ -107,7 +107,7 @@ interface Keyspace
      *
      * @return \Cassandra\Function_|null A function or null
      */
-    public function function_(string $name, ...$params);
+    public function function(string $name, ...$params);
 
     /**
      * Get all functions

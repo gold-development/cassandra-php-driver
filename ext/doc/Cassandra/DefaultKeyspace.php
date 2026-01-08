@@ -127,7 +127,7 @@ final class DefaultKeyspace implements Keyspace
      *
      * @return \Cassandra\Function_|null A function or null
      */
-    public function function_(string $name, ...$params)
+    public function function(string $name, ...$params)
     {
     }
 

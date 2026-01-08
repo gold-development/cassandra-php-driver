@@ -98,7 +98,7 @@ interface Session
      *
      * @return void Nothing.
      */
-    public function close(float $timeout = null): void;
+    public function close(?float $timeout = null): void;
 
     /**
      * Asynchronously close the session and all its connections.
@@ -117,7 +117,7 @@ interface Session
     /**
      * Get a snapshot of the cluster's current schema.
      *
-     * @return \Cassandra\Schema A snapshot of the cluster's schema.
+     * @return \Cassandra\DefaultSchema A snapshot of the cluster's schema.
      */
-    public function schema(): \Cassandra\Schema;
+    public function schema(): \Cassandra\DefaultSchema;
 }

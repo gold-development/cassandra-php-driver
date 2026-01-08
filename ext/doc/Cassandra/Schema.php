@@ -28,9 +28,9 @@ interface Schema
      *
      * @param string $name Name of the keyspace to get
      *
-     * @return \Cassandra\Keyspace Keyspace instance or null
+     * @return \Cassandra\DefaultKeyspace Keyspace instance or null
      */
-    public function keyspace(string $name): \Cassandra\Keyspace;
+    public function keyspace(string $name): \Cassandra\DefaultKeyspace;
 
     /**
      * Returns all keyspaces defined in the schema.

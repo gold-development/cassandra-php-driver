@@ -28,7 +28,7 @@ final class Timeuuid implements \Stringable, Value, UuidInterface
      *
      * @param int $timestamp Unix timestamp
      */
-    public function __construct(int $timestamp = null)
+    public function __construct(?int $timestamp = null)
     {
     }
 

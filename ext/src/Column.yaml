@@ -13,7 +13,10 @@ Column:
         comment: Type of the column
         type: \Cassandra\Type
     isReversed:
-      comment: Returns whether the column is in descending or ascending order.
+      comment: |-
+        Returns whether the column is in descending or ascending order.
+
+        @deprecated
       return:
         comment: Whether the column is stored in descending order.
         type: bool
@@ -28,12 +31,18 @@ Column:
         comment: Whether the column is frozen
         type: bool
     indexName:
-      comment: Returns name of the index if defined.
+      comment: |-
+        Returns name of the index if defined.
+
+        @deprecated
       return:
         comment: Name of the index if defined or null
         type: string
     indexOptions:
-      comment: Returns index options if present.
+      comment: |-
+        Returns index options if present.
+        
+        @deprecated
       return:
         comment: Index options if present or null
         type: string

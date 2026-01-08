@@ -106,7 +106,7 @@ final class DefaultSession implements Session
      *
      * @return void Nothing.
      */
-    public function close(float $timeout = null): void
+    public function close(?float $timeout = null): void
     {
     }
 
@@ -131,7 +131,7 @@ final class DefaultSession implements Session
     /**
      * Get a snapshot of the cluster's current schema.
      *
-     * @return \Cassandra\Schema A snapshot of the cluster's schema.
+     * @return \Cassandra\Schema
      */
     public function schema(): \Cassandra\Schema
     {

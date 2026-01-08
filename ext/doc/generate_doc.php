@@ -66,8 +66,6 @@ function isAlreadyImplementedByBase($current, $implemented) {
 function replaceKeyword($string) {
     if ($string == "Function") {
         return "Function_";
-    } else if ($string == "function") {
-        return "function_";
     } else if ($string == "Float") {
         return "Float_";
     }
@@ -383,6 +381,7 @@ function writeMethod($doc, $file, $class, $method, &$singleEOL) {
             fwrite($file, "...\$params");
         } else {
             $parameterType = parseDocMetadata($doc, $className, $methodName, $parameterName);
+            $defaultValue = NULL;
             if ($parameter->isOptional()) {
                 $defaultValue = $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null;
                 if (empty($defaultValue)) {
@@ -396,6 +395,10 @@ function writeMethod($doc, $file, $class, $method, &$singleEOL) {
                     $defaultValue = "''";
                 }
                 $parameterName = "$parameterName = $defaultValue";
+            }
+            // https://php.watch/versions/8.4/implicitly-marking-parameter-type-nullable-deprecated
+            if ($parameterType && rtrim($parameterType) !== 'mixed' && $defaultValue === 'null') {
+                $parameterType = "?$parameterType";
             }
             fwrite($file, "$parameterType\$$parameterName");
         }

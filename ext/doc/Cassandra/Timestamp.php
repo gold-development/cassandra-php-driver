@@ -30,7 +30,7 @@ final class Timestamp implements \Stringable, Value
      * @param int $seconds The number of seconds
      * @param int $microseconds The number of microseconds
      */
-    public function __construct(int $seconds = null, int $microseconds = null)
+    public function __construct(?int $seconds = null, ?int $microseconds = null)
     {
     }
 
@@ -63,7 +63,7 @@ final class Timestamp implements \Stringable, Value
      *
      * @see microtime
      */
-    public function microtime(bool $get_as_float = null)
+    public function microtime(?bool $get_as_float = null)
     {
     }
 

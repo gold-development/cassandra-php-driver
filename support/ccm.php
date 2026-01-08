@@ -22,7 +22,7 @@ use Cassandra\SimpleStatement;
 class CCM
 {
     const DEFAULT_CLUSTER_PREFIX = "php-driver";
-    const DEFAULT_CASSANDRA_VERSION = "4.1.0";
+    const DEFAULT_CASSANDRA_VERSION = "4.1.10";
     const PROCESS_TIMEOUT_IN_SECONDS = 480;
     private $clusterPrefix;
     private $isSilent;
@@ -179,7 +179,7 @@ class CCM
                 $this->run('create', '-v', 'binary:' . $this->version, '-b', $clusterName);
 
                 $params = array(
-                  'updateconf', '--rt', '1000', 'read_request_timeout_in_ms: 1000',
+                  'updateconf', 'read_request_timeout_in_ms: 1000',
                   'write_request_timeout_in_ms: 1000', 'request_timeout_in_ms: 1000',
                   'phi_convict_threshold: 16', 'hinted_handoff_enabled: false',
                   'dynamic_snitch_update_interval_in_ms: 1000',
@@ -212,21 +212,30 @@ class CCM
                 }
 
                 if (version_compare($this->version, "2.2.0", ">=")) {
-                    $this->run('updateconf', 'enable_user_defined_functions: true');
+                    $params[] = 'enable_user_defined_functions: true';
                 }
 
                 if (version_compare($this->version, "3.0.0", ">=")) {
-                    $this->run('updateconf', 'enable_scripted_user_defined_functions: true');
+                    $params[] = 'enable_scripted_user_defined_functions: true';
                 }
 
                 if (version_compare($this->version, "3.0.0", ">=")) {
-                    $this->run('updateconf', 'enable_materialized_views: true');
+                    $params[] = 'enable_materialized_views: true';
                 }
 
                 $params[] = 'key_cache_size_in_mb: 0';
                 $params[] = 'key_cache_save_period: 0';
                 $params[] = 'memtable_flush_writers: 1';
                 $params[] = 'max_hints_delivery_threads: 1';
+
+                // https://cassandra.apache.org/_/blog/Apache-Cassandra-4.1-Configuration-Standardization.html
+                if (version_compare($this->version, '4.1.0', '>=')) {
+                    $params = \preg_replace(
+                        ['/_in_ms: (\d+)/m', '/_in_mb: (\d+)/m', '/_mb_per_sec: (\d+)/m', '/^enable_(\w+)/m'],
+                        [': \1ms', ': \1MiB', ': \1MiB/s', '\1_enabled'],
+                        $params
+                    );
+                }
 
                 call_user_func_array(array($this, 'run'), $params);
                 $this->run('populate', '-n', $dataCenterOneNodes.':'.$dataCenterTwoNodes, '-i', '127.0.0.');

@@ -176,7 +176,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withTokenAwareRouting(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withTokenAwareRouting(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -232,7 +232,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withPersistentSessions(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withPersistentSessions(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -281,7 +281,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withConnectionsPerHost(int $core, int $max = null): \Cassandra\Cluster\Builder
+    public function withConnectionsPerHost(int $core, ?int $max = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -304,7 +304,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withLatencyAwareRouting(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withLatencyAwareRouting(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -315,7 +315,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withTCPNodelay(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withTCPNodelay(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -368,7 +368,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withSchemaMetadata(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withSchemaMetadata(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -387,7 +387,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withHostnameResolution(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withHostnameResolution(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 
@@ -404,7 +404,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withRandomizedContactPoints(bool $enabled = null): \Cassandra\Cluster\Builder
+    public function withRandomizedContactPoints(?bool $enabled = null): \Cassandra\Cluster\Builder
     {
     }
 

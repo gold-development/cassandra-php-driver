@@ -119,7 +119,7 @@ abstract class BasicIntegrationTest extends TestCase {
      */
     protected function setUp(): void {
         // Initialize the database and establish a connection
-        $this->integration = new Integration(get_class(), $this->getName(false),
+        $this->integration = new Integration(get_class($this), $this->getName(false),
             $this->numberDC1Nodes, $this->numberDC2Nodes,
             $this->replicationFactor, $this->isClientAuthentication,
             $this->isSSL, $this->isUserDefinedAggregatesFunctions);

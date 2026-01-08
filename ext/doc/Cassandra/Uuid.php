@@ -28,7 +28,7 @@ final class Uuid implements \Stringable, Value, UuidInterface
      *
      * @param string $uuid A uuid string
      */
-    public function __construct(string $uuid = null)
+    public function __construct(?string $uuid = null)
     {
     }
 

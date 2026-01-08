@@ -20,8 +20,6 @@ namespace Cassandra;
 
 /**
  * Schema metadata integration tests.
- *
- * @group flaky
  */
 class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
     /**
@@ -70,7 +68,8 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
                     array_filter(array_keys($tableSchema),
                     function ($columnName) { return strpos($columnName, "key") === 0; }))
             );
-            $this->session->execute($query);
+            $this->session->execute($query)->count();
+            usleep(200000);
         }
     }
 
@@ -82,6 +81,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             "CREATE TABLE {$this->tableNamePrefix} " .
             "(key1 text, value1 int, value2 map<text, text>, PRIMARY KEY(key1))"
         );
+        usleep(200000);
     }
 
     /**
@@ -89,6 +89,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
      */
     protected function createSimpleSecondaryIndex() {
         $this->session->execute("CREATE INDEX simple ON {$this->tableNamePrefix} (value1)");
+        sleep(1);
     }
 
     /**
@@ -96,6 +97,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
      */
     protected function createCollectionSecondaryIndex() {
         $this->session->execute("CREATE INDEX collection ON {$this->tableNamePrefix} (KEYS(value2))");
+        sleep(1);
     }
 
     /**
@@ -134,6 +136,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             "CREATE TABLE {$this->tableNamePrefix}_2 " .
             "(key1 text, key2 int, value1 int, PRIMARY KEY(key1, key2))"
         );
+        usleep(200000);
     }
 
     /**
@@ -146,6 +149,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             "SELECT $column FROM {$this->tableNamePrefix}_1 WHERE value1 IS NOT NULL AND key1 IS NOT NULL " .
             "PRIMARY KEY(value1, key1)"
         );
+        usleep(200000);
     }
 
     /**
@@ -506,6 +510,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             if (strpos($keyspaceName, "system") === 0) continue;
             $this->createKeyspace($keyspaceName);
         }
+        usleep(200000);
 
         $count = 0;
         foreach ($this->session->schema()->keyspaces() as $keyspace) {
@@ -631,6 +636,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             "CREATE TABLE {$this->tableNamePrefix}_with_index " .
             "(key int PRIMARY KEY, value map<text, frozen<map<int, int>>>)"
         );
+        usleep(200000);
 
         $keyspace = $this->session->schema()->keyspace($this->keyspaceName);
         $this->assertNotNull($keyspace);
@@ -644,7 +650,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
         $this->assertNull($indexOptions);
 
         $this->session->execute("CREATE INDEX ON {$this->tableNamePrefix}_with_index (value)");
-        sleep(10);
+        sleep(1);
 
         $keyspace = $this->session->schema()->keyspace($this->keyspaceName);
         $this->assertNotNull($keyspace);
@@ -676,6 +682,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             "CREATE TABLE {$this->tableNamePrefix}_null_comment " .
             "(key int PRIMARY KEY, value int)"
         );
+        usleep(200000);
 
         $keyspace = $this->session->schema()->keyspace($this->keyspaceName);
         $table = $keyspace->table("{$this->tableNamePrefix}_null_comment");
@@ -714,6 +721,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             "CREATE TABLE {$this->tableNamePrefix}_nested3 " .
             "(key int PRIMARY KEY, value list<frozen<map<int, frozen<set<int>>>>>)"
         );
+        usleep(200000);
 
         $keyspace = $this->session->schema()->keyspace($this->keyspaceName);
 
@@ -1280,6 +1288,7 @@ class SchemaMetadataIntegrationTest extends BasicIntegrationTest {
             . "key TEXT PRIMARY KEY,"
             . "value 'org.apache.cassandra.db.marshal.LexicalUUIDType')"
         );
+        usleep(200000);
 
         // Get the schema from the session
         $schema = $this->session->schema();

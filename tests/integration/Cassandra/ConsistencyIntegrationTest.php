@@ -40,6 +40,7 @@ class ConsistencyIntegrationTest extends BasicIntegrationTest {
     public function testDefaultConsistencyLevel() {
         // Create a new table
         $this->session->execute("CREATE TABLE {$this->tableNamePrefix} (key int PRIMARY KEY)");
+        usleep(200000);
 
         // Enable tracing
         $this->ccm->enableTracing(true);

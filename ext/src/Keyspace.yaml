@@ -30,7 +30,7 @@ Keyspace:
           type: string
       return:
         comment: Table instance or null
-        type: \Cassandra\Table|null
+        type: \Cassandra\DefaultTable|null
     tables:
       comment: Returns all tables defined in this keyspace
       return:

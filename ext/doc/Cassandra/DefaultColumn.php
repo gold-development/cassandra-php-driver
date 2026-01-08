@@ -44,6 +44,8 @@ final class DefaultColumn implements Column
     /**
      * Returns whether the column is in descending or ascending order.
      *
+     * @deprecated
+     *
      * @return bool Whether the column is stored in descending order.
      */
     public function isReversed(): bool
@@ -71,6 +73,8 @@ final class DefaultColumn implements Column
     /**
      * Returns name of the index if defined.
      *
+     * @deprecated
+     *
      * @return string Name of the index if defined or null
      */
     public function indexName(): string
@@ -79,6 +83,8 @@ final class DefaultColumn implements Column
 
     /**
      * Returns index options if present.
+     *
+     * @deprecated
      *
      * @return string Index options if present or null
      */

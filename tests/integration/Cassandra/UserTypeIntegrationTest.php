@@ -128,7 +128,7 @@ class UserTypeIntegrationTest extends CollectionsIntegrationTest {
      *                                           value
      *                                           (DEFAULT: self::generateAddressValue())
      */
-    public static function assertAddressValue(UserTypeValue $address, UserTypeValue $expected = null) {
+    public static function assertAddressValue(UserTypeValue $address, ?UserTypeValue $expected = null) {
         // Determine if the expected value should be defaulted
         if (is_null($expected)) {
             $expected = self::generateAddressValue();
