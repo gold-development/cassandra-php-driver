@@ -9,6 +9,7 @@
 *.libs
 *.sw*
 *.loT
+*.dep
 Makefile
 Makefile.fragments
 Makefile.global
@@ -19,6 +20,7 @@ config.*
 !config.w32
 configure
 configure.in
+configure.ac
 .sconf_temp
 .sconsign.dblite
 .deps
