@@ -18,7 +18,9 @@ if (-not (Test-Path "$deps\cpp-driver\lib\cassandra_static.lib")) {
   cmake -S lib\cpp-driver -B cpp-build -A x64 `
     -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_INSTALLATION_ROOT\scripts\buildsystems\vcpkg.cmake" `
     -DVCPKG_TARGET_TRIPLET=$triplet `
-    -DLIBUV_ROOT_DIR="$vi" -DOPENSSL_ROOT_DIR="$vi" -DZLIB_ROOT="$vi" `
+    -DLIBUV_ROOT_DIR="$vi" -DOPENSSL_ROOT_DIR="$vi" `
+    -DZLIB_ROOT="$vi" -DZLIB_INCLUDE_DIR="$vi\include" -DZLIB_LIBRARY="$vi\lib\zlib.lib" `
+    -DCMAKE_C_FLAGS="/I $vi\include" -DCMAKE_CXX_FLAGS="/I $vi\include" `
     -DCASS_BUILD_STATIC=ON -DCASS_BUILD_SHARED=OFF -DCASS_USE_STATIC_LIBS=ON `
     -DCASS_USE_ZLIB=ON -DCASS_INSTALL_HEADER=ON `
     -DCMAKE_INSTALL_PREFIX="$deps\cpp-driver"
