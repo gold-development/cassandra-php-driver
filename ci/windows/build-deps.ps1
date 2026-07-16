@@ -36,22 +36,35 @@ function New-Dir($p) { New-Item -ItemType Directory -Force -Path $p | Out-Null }
 New-Dir "$deps\libuv\lib";       New-Dir "$deps\libuv\include"
 New-Dir "$deps\thirdparty\lib";  New-Dir "$deps\thirdparty\include"
 
-# libuv -> config.w32 wants libuv.lib + uv.h  (vcpkg ships uv.lib)
-Copy-Item "$vi\lib\uv.lib"        "$deps\libuv\lib\libuv.lib"        -Force
-Copy-Item "$vi\include\uv.h"      "$deps\libuv\include\uv.h"         -Force
-Copy-Item "$vi\include\uv"        "$deps\libuv\include\uv" -Recurse -Force -ErrorAction SilentlyContinue
+# vcpkg lib filenames vary (uv.lib vs libuv.lib vs uv_a.lib, etc.), so match by
+# pattern and copy to the fixed names ext/config.w32 checks for. Debug libs live
+# in $vi\debug\lib, so $vi\lib holds only release libs -> no debug ambiguity.
+function StageLib($pattern, $dest) {
+  $f = Get-ChildItem -Path $pattern -ErrorAction SilentlyContinue | Select-Object -First 1
+  if (-not $f) {
+    Write-Host "Available libs in $vi\lib :"; Get-ChildItem "$vi\lib" | ForEach-Object { Write-Host "  $($_.Name)" }
+    throw "No lib matching $pattern"
+  }
+  Copy-Item $f.FullName $dest -Force
+  Write-Host "staged $($f.Name) -> $dest"
+}
+
+# libuv -> config.w32 wants libuv.lib + uv.h
+StageLib "$vi\lib\*uv*.lib" "$deps\libuv\lib\libuv.lib"
+Copy-Item "$vi\include\uv.h" "$deps\libuv\include\uv.h" -Force
+Copy-Item "$vi\include\uv"   "$deps\libuv\include\uv" -Recurse -Force -ErrorAction SilentlyContinue
 
 # OpenSSL 3 under the legacy names config.w32 checks (libeay32/ssleay32)
-Copy-Item "$vi\lib\libcrypto.lib" "$deps\thirdparty\lib\libeay32.lib" -Force
-Copy-Item "$vi\lib\libssl.lib"    "$deps\thirdparty\lib\ssleay32.lib" -Force
-Copy-Item "$vi\include\openssl"   "$deps\thirdparty\include\openssl" -Recurse -Force
+StageLib "$vi\lib\libcrypto*.lib" "$deps\thirdparty\lib\libeay32.lib"
+StageLib "$vi\lib\libssl*.lib"    "$deps\thirdparty\lib\ssleay32.lib"
+Copy-Item "$vi\include\openssl" "$deps\thirdparty\include\openssl" -Recurse -Force
 
-# zlib -> zlib_a.lib   (vcpkg static ships zlib.lib)
-Copy-Item "$vi\lib\zlib.lib"      "$deps\thirdparty\lib\zlib_a.lib"  -Force
+# zlib -> zlib_a.lib
+StageLib "$vi\lib\zlib*.lib" "$deps\thirdparty\lib\zlib_a.lib"
 Copy-Item "$vi\include\zlib.h","$vi\include\zconf.h" "$deps\thirdparty\include\" -Force
 
 # gmp -> mpir_a.lib   (extension links GMP for Bigint/Decimal/Varint)
-Copy-Item "$vi\lib\gmp.lib"       "$deps\thirdparty\lib\mpir_a.lib"  -Force
-Copy-Item "$vi\include\gmp.h"     "$deps\thirdparty\include\gmp.h"   -Force
+StageLib "$vi\lib\*gmp*.lib" "$deps\thirdparty\lib\mpir_a.lib"
+Copy-Item "$vi\include\gmp.h" "$deps\thirdparty\include\gmp.h" -Force
 
 Write-Host "Deps staged under $deps"
