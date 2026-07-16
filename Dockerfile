@@ -3,7 +3,7 @@ WORKDIR /tmp/cassandra-php-driver
 
 RUN apt update -y \
  && apt install python3 pip cmake unzip plocate build-essential git libuv1-dev libssl-dev libgmp-dev openssl zlib1g-dev libpcre2-dev -y \
- && pip install --break-system-packages setuptools git+https://github.com/apache/cassandra-ccm \
+ && pip install --break-system-packages --ignore-installed setuptools git+https://github.com/apache/cassandra-ccm \
  && apt-get install -y wget gnupg ca-certificates \
  && mkdir -p /etc/apt/keyrings \
  && wget -O /etc/apt/keyrings/adoptium.gpg https://packages.adoptium.net/artifactory/api/gpg/key/public \
