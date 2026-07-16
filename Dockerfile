@@ -49,11 +49,8 @@ COPY tests tests
 COPY phpunit.xml .
 ENV JAVA_HOME=/usr
 RUN bin/phpunit --stop-on-error --stop-on-failure --testsuite unit
-RUN bin/phpunit --stop-on-error --stop-on-failure --testsuite integration
-
-COPY features features
-COPY behat.yml .
-RUN bin/behat --stop-on-failure --tags="~@skip-ci"
+# integration + behat suites need a live Cassandra cluster (ccm), which is not
+# runnable inside `docker build`. Run them in a separate runtime job instead.
 
 RUN make clean \
  && make clean -C ext
