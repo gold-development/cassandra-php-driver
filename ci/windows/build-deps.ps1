@@ -59,8 +59,8 @@ StageLib "$vi\lib\libcrypto*.lib" "$deps\thirdparty\lib\libeay32.lib"
 StageLib "$vi\lib\libssl*.lib"    "$deps\thirdparty\lib\ssleay32.lib"
 Copy-Item "$vi\include\openssl" "$deps\thirdparty\include\openssl" -Recurse -Force
 
-# zlib -> zlib_a.lib
-StageLib "$vi\lib\zlib*.lib" "$deps\thirdparty\lib\zlib_a.lib"
+# zlib -> zlib_a.lib   (vcpkg names the static zlib "zs.lib")
+StageLib "$vi\lib\z*.lib" "$deps\thirdparty\lib\zlib_a.lib"
 Copy-Item "$vi\include\zlib.h","$vi\include\zconf.h" "$deps\thirdparty\include\" -Force
 
 # gmp -> mpir_a.lib   (extension links GMP for Bigint/Decimal/Varint)
