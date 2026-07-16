@@ -1,5 +1,5 @@
 {
-  "name": "gold-development/cassandra-php-driver",
+  "name": "datastax/php-driver",
   "type": "php-ext",
   "description": "DataStax PHP Driver for Apache Cassandra",
   "keywords": [
@@ -9,7 +9,7 @@
     "driver",
     "datastax"
   ],
-  "homepage": "https://github.com/gold-development/cassandra-php-driver",
+  "homepage": "http://datastax.github.io/php-driver/",
   "license": "Apache-2.0",
   "authors": [
     {

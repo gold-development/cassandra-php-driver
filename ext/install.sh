@@ -40,23 +40,8 @@ popd
 echo "Compiling and installing the extension..."
 phpize
 
-# Detect OpenSSL location
-if [ -d "/opt/homebrew/opt/openssl@3" ]; then
-  OPENSSL_PREFIX="/opt/homebrew/opt/openssl@3"
-elif [ -d "/opt/homebrew/opt/openssl" ]; then
-  OPENSSL_PREFIX="/opt/homebrew/opt/openssl"
-elif [ -d "/usr/local/opt/openssl" ]; then
-  OPENSSL_PREFIX="/usr/local/opt/openssl"
-else
-  OPENSSL_PREFIX=""
-fi
-
 echo ./configure --with-cassandra=$builddir --with-libdir=lib
-if [ -n "$OPENSSL_PREFIX" ]; then
-  LIBS="-lssl -lcrypto -lz -luv -lm -lstdc++" LDFLAGS="-L$builddir/lib -L$OPENSSL_PREFIX/lib" ./configure --with-cassandra=$builddir --with-libdir=lib
-else
-  LIBS="-lssl -lcrypto -lz -luv -lm -lstdc++" LDFLAGS="-L$builddir/lib" ./configure --with-cassandra=$builddir --with-libdir=lib
-fi
+LIBS="-lssl -lz -luv -lm -lstdc++" LDFLAGS="-L$builddir/lib" ./configure --with-cassandra=$builddir --with-libdir=lib
 make
 make install
 

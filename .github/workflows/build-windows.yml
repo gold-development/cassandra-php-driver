@@ -1,0 +1,75 @@
+name: build-windows
+
+on:
+  push:
+    branches: [master]
+    tags: ['v*']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022            # VS2022/VS17 + vcpkg preinstalled
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+        ts:  ['ts', 'nts']
+    env:
+      TS: ${{ matrix.ts }}
+      ARCH: 'x64'
+      DEPS_ROOT: ${{ github.workspace }}\deps
+      PHP_SDK_DIR: ${{ github.workspace }}\php-sdk
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive       # pulls lib/cpp-driver
+
+      - name: Cache native deps
+        id: deps-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.DEPS_ROOT }}
+          key: deps-x64-${{ hashFiles('ci/windows/build-deps.ps1', '.gitmodules') }}
+
+      - name: Build native deps (cpp-driver + vcpkg libs)
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        run: powershell -ExecutionPolicy Bypass -File ci\windows\build-deps.ps1
+
+      - name: Clone php-sdk-binary-tools
+        run: git clone --depth 1 https://github.com/php/php-sdk-binary-tools.git "$env:PHP_SDK_DIR"
+
+      - name: Resolve newest php-src tag for series
+        id: php
+        shell: pwsh
+        run: |
+          $s = "${{ matrix.php }}"
+          $tag = git ls-remote --tags https://github.com/php/php-src.git "php-$s.*" |
+            ForEach-Object { ($_ -split '/')[-1] } |
+            Where-Object { $_ -match "^php-$([regex]::Escape($s))\.\d+$" } |
+            Sort-Object { [version]($_ -replace '^php-','') } |
+            Select-Object -Last 1
+          "phptag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Build extension
+        run: cmd /c "%PHP_SDK_DIR%\phpsdk-vs17-%ARCH%.bat -t ci\windows\build-ext.bat"
+        env:
+          PHP_SRC_TAG: ${{ steps.php.outputs.phptag }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: php_cassandra-${{ matrix.php }}-${{ matrix.ts }}-vs17-x64
+          path: artifacts/*.dll
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.dll
