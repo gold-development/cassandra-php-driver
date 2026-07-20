@@ -189,8 +189,14 @@ class NumberTest extends TestCase {
             // Integer values
             $provider[] = array($class, $max);
 
-            // Double values
-            $provider[] = array($class, (double) $max);
+            // Double values -- only when the value is exactly representable as a
+            // double. (double) PHP_INT_MAX rounds up to 2^63, and casting that
+            // back to an int is a lossy conversion deprecated as of PHP 8.1.
+            $double = (double) $max;
+            if ($double >= -9223372036854775808.0 && $double < 9223372036854775808.0
+                && (int) $double === $max) {
+                $provider[] = array($class, $double);
+            }
 
             // String values (in base 2, 8, 10, 16)
             foreach (array(2 => "0b", 8 => "0", 10 => "", 16 => "0x") as $base => $prefix) {
