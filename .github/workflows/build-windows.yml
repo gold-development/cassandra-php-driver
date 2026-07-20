@@ -20,13 +20,13 @@ jobs:
       DEPS_ROOT: ${{ github.workspace }}\deps
       PHP_SDK_DIR: ${{ github.workspace }}\php-sdk
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           submodules: recursive       # pulls lib/cpp-driver
 
       - name: Cache native deps
         id: deps-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.DEPS_ROOT }}
           key: deps-x64-${{ hashFiles('ci/windows/build-deps.ps1', '.gitmodules') }}
@@ -55,7 +55,7 @@ jobs:
         env:
           PHP_SRC_TAG: ${{ steps.php.outputs.phptag }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: php_cassandra-${{ matrix.php }}-${{ matrix.ts }}-vs17-x64
           path: artifacts/*.dll
@@ -66,10 +66,10 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: dist
           merge-multiple: true
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: dist/*.dll
