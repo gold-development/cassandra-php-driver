@@ -181,7 +181,7 @@ static void
 php_driver_log(const CassLogMessage *message, void *data)
 {
   char log[MAXPATHLEN + 1];
-  uint log_length = 0;
+  unsigned int log_length = 0;
 
   /* Making a copy here because location could be updated by a PHP thread. */
   uv_rwlock_rdlock(&log_lock);

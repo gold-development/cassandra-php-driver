@@ -391,7 +391,7 @@ bind_arguments(CassStatement *statement, HashTable *arguments TSRMLS_DC)
                                  PHP5TO7_ZVAL_MAYBE_DEREF(current) TSRMLS_CC);
 #else
   char *str_key;
-  uint str_len;
+  unsigned int str_len;
   PHP5TO7_ZEND_HASH_FOREACH_KEY_VAL(arguments, num_key, str_key, str_len, current) {
     if (str_key) {
       rc = bind_argument_by_name(statement, str_key,
