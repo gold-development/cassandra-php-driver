@@ -244,7 +244,11 @@ if (PHP_CASSANDRA != "no") {
           }
 
           // Ensure gdi32.lib is linked for all dependency extensions
-          ADD_FLAG("LIBS", "gdi32.lib"); // This is needed for vc_build.bat
+          //   gdi32   : needed for vc_build.bat
+          //   crypt32 : OpenSSL CAPI engine / winstore (Cert* APIs)
+          //   dbghelp : libuv process.c (Sym*, MiniDumpWriteDump)
+          //   version : cpp-driver client_insights (GetFileVersionInfo*, VerQueryValue)
+          ADD_FLAG("LIBS", "gdi32.lib crypt32.lib dbghelp.lib version.lib");
 
           AC_DEFINE("HAVE_CASSANDRA_EXT", PHP_CASSANDRA_SHARED ? 0 : 1, "Have DataStax PHP driver extension");
         } else {
