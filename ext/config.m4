@@ -168,14 +168,12 @@ if test "$PHP_CASSANDRA" != "no"; then
       ;;
   esac
 
-  PHP_NEW_EXTENSION(cassandra,
-    php_driver.c \
-    $CASSANDRA_CLASSES \
-    $CASSANDRA_EXCEPTIONS \
-    $CASSANDRA_RETRY_POLICIES \
-    $CASSANDRA_TYPES \
-    $CASSANDRA_UTIL,
-    $ext_shared, , $CASSANDRA_CFLAGS)
+  dnl Build the source list in a single shell variable. Backslash line
+  dnl continuations inside the macro argument emit an empty entry per
+  dnl separator, which becomes a bogus ".lo" object and breaks the link.
+  CASSANDRA_SOURCES="php_driver.c $CASSANDRA_CLASSES $CASSANDRA_EXCEPTIONS $CASSANDRA_RETRY_POLICIES $CASSANDRA_TYPES $CASSANDRA_UTIL"
+
+  PHP_NEW_EXTENSION(cassandra, $CASSANDRA_SOURCES, $ext_shared, , $CASSANDRA_CFLAGS)
   PHP_ADD_BUILD_DIR($ext_builddir/src)
   PHP_ADD_BUILD_DIR($ext_builddir/src/Cluster)
   PHP_ADD_BUILD_DIR($ext_builddir/src/Exception)
