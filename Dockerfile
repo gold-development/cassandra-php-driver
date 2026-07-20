@@ -16,7 +16,7 @@ RUN mkdir -p ~/.ccm && echo '[repositories]\ncassandra = https://dlcdn.apache.or
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin
 RUN docker-php-source extract \
- && install-php-extensions @composer intl zip pcntl gmp ast xdebug yaml
+ && install-php-extensions @composer intl zip pcntl gmp xdebug yaml
 
 COPY lib lib
 RUN cmake -DCMAKE_CXX_FLAGS="-fPIC" -DCASS_BUILD_STATIC=OFF -DCASS_BUILD_SHARED=ON -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_LIBDIR:PATH=lib -DCASS_USE_ZLIB=ON lib/cpp-driver \
