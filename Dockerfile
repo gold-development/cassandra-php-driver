@@ -30,7 +30,7 @@ ENV NO_INTERACTION=true
 RUN cd ext \
  && phpize \
  && LDFLAGS="-L/usr/local/lib" LIBS="-lssl -lz -luv -lm -lgmp -lstdc++" ./configure --with-cassandra=/usr/local \
- && make -j$(nproc) \
+ && make \
  && make test \
  && make install \
  && mv cassandra.ini /usr/local/etc/php/conf.d/docker-php-ext-cassandra.ini \
