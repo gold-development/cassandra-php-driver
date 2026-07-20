@@ -24,12 +24,19 @@ jobs:
         with:
           submodules: recursive       # pulls lib/cpp-driver
 
+      # The cpp-driver version is the submodule gitlink SHA, which is NOT part of
+      # .gitmodules -- it must be in the cache key or a pin change reuses a stale build.
+      - name: Resolve cpp-driver commit (cache key)
+        id: cppdrv
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD:lib/cpp-driver)" >> "$GITHUB_OUTPUT"
+
       - name: Cache native deps
         id: deps-cache
         uses: actions/cache@v6
         with:
           path: ${{ env.DEPS_ROOT }}
-          key: deps-x64-${{ hashFiles('ci/windows/build-deps.ps1', '.gitmodules') }}
+          key: deps-x64-${{ steps.cppdrv.outputs.sha }}-${{ hashFiles('ci/windows/build-deps.ps1') }}
 
       - name: Build native deps (cpp-driver + vcpkg libs)
         if: steps.deps-cache.outputs.cache-hit != 'true'

@@ -1,4 +1,4 @@
-FROM php:8.4
+FROM php:8.5
 WORKDIR /tmp/cassandra-php-driver
 
 RUN apt update -y \
@@ -35,8 +35,6 @@ RUN cd ext \
  && make install \
  && mv cassandra.ini /usr/local/etc/php/conf.d/docker-php-ext-cassandra.ini \
  && cd ..
-
-RUN ext/doc/generate_doc.sh
 
 COPY composer.json .
 RUN composer install -n
