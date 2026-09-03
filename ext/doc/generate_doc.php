@@ -602,6 +602,35 @@ function writeClassDoc($doc, $file, $class) {
     fwrite($file, DOC_COMMENT_FOOTER);
 }
 
+/**
+ * Alias a renamed stub back to the name the extension actually registers.
+ *
+ * PHP will not parse "class Float" or "interface Function", so those stubs are
+ * declared with a trailing underscore. The extension has no such restriction,
+ * meaning the name that works at runtime is the one the stub cannot declare.
+ * Editors read class_alias(), so this is what lets tooling resolve the real
+ * name instead of pushing the underscored one into code that then fails.
+ *
+ * The stubs are never executed, so the call is not guarded.
+ */
+function writeClassAlias($file, $class) {
+    $shortName = $class->getShortName();
+    $stubName = replaceKeyword($shortName);
+
+    if ($stubName === $shortName) {
+        return;
+    }
+
+    $namespace = $class->getNamespaceName();
+    $prefix = $namespace === "" ? "" : $namespace . chr(92);
+
+    fwrite($file, PHP_EOL . PHP_EOL);
+    fwrite($file, "// The extension registers this class as " . chr(92) . $prefix . $shortName . ", which PHP" . PHP_EOL);
+    fwrite($file, "// refuses to accept as a declaration, so the stub is named " . $stubName . " and" . PHP_EOL);
+    fwrite($file, "// aliased here. Write " . chr(92) . $prefix . $shortName . " in code; " . $stubName . " does not exist at runtime." . PHP_EOL);
+    fwrite($file, "class_alias('" . $prefix . $stubName . "', '" . $prefix . $shortName . "');" . PHP_EOL);
+}
+
 function writeClass($doc, $file, $class) {
     $namespace = $class->getNamespaceName();
     $className = $class->getShortName();
@@ -769,6 +798,7 @@ foreach(YamlClassDoc::getClassDocs() as $classDoc) {
     }
 
     writeClass($doc, $file, $class);
+    writeClassAlias($file, $class);
 
     fclose($file);
 

@@ -173,3 +173,9 @@ final class Float_ implements \Stringable, Value, Numeric
     {
     }
 }
+
+
+// The extension registers this class as \Cassandra\Float, which PHP
+// refuses to accept as a declaration, so the stub is named Float_ and
+// aliased here. Write \Cassandra\Float in code; Float_ does not exist at runtime.
+class_alias('Cassandra\Float_', 'Cassandra\Float');

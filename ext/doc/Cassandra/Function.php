@@ -79,3 +79,9 @@ interface Function_
      */
     public function isCalledOnNullInput(): bool;
 }
+
+
+// The extension registers this class as \Cassandra\Function, which PHP
+// refuses to accept as a declaration, so the stub is named Function_ and
+// aliased here. Write \Cassandra\Function in code; Function_ does not exist at runtime.
+class_alias('Cassandra\Function_', 'Cassandra\Function');
