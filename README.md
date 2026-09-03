@@ -1,67 +1,123 @@
-:warning: **The PHP driver is in maintenance mode. We are still accepting pull-requests and we will occasionally release critical bug fixes, but no ongoing active development is being done currently.**
+# PHP Driver for Apache Cassandra
 
-# DataStax PHP Driver for Apache Cassandra
+[![build](https://github.com/gold-development/cassandra-php-driver/actions/workflows/build.yml/badge.svg)](https://github.com/gold-development/cassandra-php-driver/actions/workflows/build.yml)
+[![build-windows](https://github.com/gold-development/cassandra-php-driver/actions/workflows/build-windows.yml/badge.svg)](https://github.com/gold-development/cassandra-php-driver/actions/workflows/build-windows.yml)
 
-[![Build Status: Linux](https://travis-ci.org/datastax/php-driver.svg)](https://travis-ci.org/datastax/php-driver)
-[![Build Status: Windows](https://ci.appveyor.com/api/projects/status/8vrxpkfl4xm2f3nm?svg=true)](https://ci.appveyor.com/project/DataStax/php-driver)
+This is a fork of [DataStax's PHP driver][upstream] for Apache Cassandra,
+maintained here because upstream has been in maintenance mode since 2023 and
+does not build against current PHP. This fork adds the changes needed to
+build and run on **PHP 8.4 and 8.5**, on both Linux and Windows, and keeps
+that working through CI rather than by hand.
 
 A modern, [feature-rich][Features] and highly tunable PHP client library for
 [Apache Cassandra] 2.1+ using exclusively Cassandra's binary protocol and
-Cassandra Query Language v3. __Use the [DSE PHP driver] for better compatibility
-and support for [DataStax Enterprise]__.
+Cassandra Query Language v3.
 
 This is a wrapper around the [DataStax C/C++ Driver for Apache Cassandra].
 
-__Note__: DataStax products do not support big-endian systems.
+## Getting the driver
 
-## Getting the Driver
+**Windows** — prebuilt DLLs for PHP 8.4 and 8.5 (thread-safe and non-thread-safe,
+x64) are attached to each [release][Releases], and to every
+[build-windows run][build-windows] as workflow artifacts. Drop the DLL into
+your PHP `ext` directory and add `extension=php_cassandra` to `php.ini`.
 
-Binary versions of the driver, available for multiple operating systems and
-multiple versions of PHP, can be obtained from [DataStax download server]. The
-source code is made available via [GitHub]. __If you're using [DataStax Enterprise]
-use the [DSE PHP driver] instead__.
+**Linux** — there is no packaged build yet; compile it yourself:
 
-__Note__: The driver extension is a wrapper around the 
-          [DataStax C/C++ Driver for Apache Cassandra] and is a requirement for proper
-          installation of the PHP extension binaries. Ensure these dependencies are met before proceeding.
+```bash
+cd ext
+phpize
+./configure --with-cassandra=/usr/local   # path to a built libcassandra
+make && sudo make install
+```
 
-## What's new in v1.2.0/v1.3.0
+or build the [Dockerfile](Dockerfile) in this repository, which builds the
+DataStax C++ driver, compiles the extension against it, and runs the unit
+suite in one step:
 
-* Support for [`duration`]
-* `Session::execute()` and `Session::executeAsync()` now support a
-  [simple string] for the query CQL and a simple array for the query execution
-  option
-* Full support for Apache Cassandra 2.2 and 3.0+
-* Support for [`tinyint` and `smallint`]
-* Support for [`date`] and [`time`]
-* Support for [user-defined function and aggregate] metadata
-* Support for [secondary index] and [materialized view] metadata
+```bash
+docker build . -t cassandra-php-driver
+```
+
+__Note__: the extension wraps the
+[DataStax C/C++ Driver for Apache Cassandra], which is a build-time
+dependency either way — `ext/README.md` has the details for a from-source
+Linux build, and [`ci/windows`](ci/windows) shows exactly how the Windows
+build stages OpenSSL, zlib, libuv and the C++ driver via vcpkg.
+
+## Editor support
+
+The extension is a compiled binary, so an editor has nothing to read
+signatures or docblocks from. `ext/doc` documents every class the extension
+registers as plain (uninstantiable) PHP, generated from the docs in
+`ext/src/*.yaml` by reflecting over the loaded extension — see
+[`ext/doc/README.md`](ext/doc/README.md).
+
+Composer cannot install this repository directly: its `composer.json` is
+`type: php-ext`, which Composer refuses to install (that type belongs to
+[PIE]). Describe it as an inline package instead, pinned to a commit:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "package",
+      "package": {
+        "name": "gold-development/cassandra-stubs",
+        "version": "1.5.0",
+        "type": "library",
+        "dist": {
+          "type": "zip",
+          "url": "https://github.com/gold-development/cassandra-php-driver/archive/<commit-sha>.zip",
+          "reference": "<commit-sha>"
+        }
+      }
+    }
+  ],
+  "require-dev": {
+    "gold-development/cassandra-stubs": "1.5.0"
+  }
+}
+```
+
+Editors index `vendor/` on their own, so nothing further to configure.
+Two reserved PHP keywords are involved: `Cassandra\Float` and
+`Cassandra\Function` are what the extension actually registers, but PHP will
+not parse a class or type declared with either name, so the stubs are named
+`Float_`/`Function_` and `class_alias()` them back — write the real name in
+your code.
+
+Regenerating after a change to `ext/src/*.yaml` needs a build of this image,
+since the generator reflects over the loaded extension and needs `ext-yaml`:
+
+```bash
+docker build . -t cassandra-php-driver
+docker run --rm -v "$PWD/ext/doc:/tmp/cassandra-php-driver/ext/doc" cassandra-php-driver \
+  php ext/doc/generate_doc.php ext
+```
+
+CI fails the build if `ext/doc` and `ext/src` disagree, so this is not
+optional after touching the documentation.
 
 ## Compatibility
 
-This driver works exclusively with the Cassandra Query Language v3 (CQL3) and
-Cassandra's native protocol. The current version works with:
-
-* Apache Cassandra versions 2.1, 2.2 and 3.0+
-* PHP 5.6, PHP 7.0, PHP 7.1 and PHP 8.1
-  * 32-bit (x86) and 64-bit (x64)
-  * Thread safe (TS) and non-thread safe (NTS)
-* Compilers: GCC 4.1.2+, Clang 3.4+, and MSVC 2010/2012/2013/2015
-
-If using [DataStax Enterprise] the [DSE PHP driver] provides more features and
-better compatibility.
+* Apache Cassandra 2.1, 2.2 and 3.0+
+* PHP 8.4 and 8.5
+  * Windows: 64-bit (x64), thread safe (TS) and non-thread safe (NTS), built
+    with the matching VS17 toolchain
+  * Linux: built and unit tested in Docker against `php:8.5`
 
 ## Documentation
 
-* [Home]
-* [API]
-* [Features]
+* [Home] · [API] · [Features] — from upstream; the wire protocol, data types
+  and CQL support have not changed, only the PHP build has.
 
-## Getting Help
+## Getting help
 
-* JIRA: https://datastax-oss.atlassian.net/browse/PHP
-* Mailing List: https://groups.google.com/a/lists.datastax.com/forum/#!forum/php-driver-user
-* DataStax Academy via Slack: https://academy.datastax.com/slack
+This fork does not carry over upstream's DataStax-specific support channels
+(their JIRA and mailing list are for the driver they maintain, not this
+build). Use [GitHub Issues][Issues] for anything specific to this fork —
+the Windows build, PHP 8.4/8.5 compatibility, or the generated stubs.
 
 ## Quick Start
 
@@ -82,51 +138,36 @@ foreach ($result as $row) {                       // results and rows implement 
 }
 ```
 
-## Installation
-
-```bash
-pecl install cassandra
-```
-
-[Read detailed instructions on building and installing the
-extension][installing-details]
-
 ## Contributing
 
 [Read our contribution policy][contribution-policy] for a detailed description
-of the process.
+of the process. It is written for upstream; open a pull request against this
+fork the same way.
 
 ## Code examples
 
-The DataStax PHP Driver uses the amazing [Behat Framework] for both end-to-end,
-or acceptance testing and documentation. All of the features supported by the
-driver have appropriate acceptance tests with [easy-to-copy code examples in
-the `features/` directory][Features].
+The driver uses the [Behat Framework] for end-to-end, acceptance-style
+testing and documentation. All supported features have appropriate
+acceptance tests with [easy-to-copy code examples in the `features/`
+directory][Features].
 
 ## Running tests
 
-For your convenience a `Vagrantfile` with configuration ready for testing is
-available. To execute tests, run the following:
-
 ```bash
-git clone https://github.com/datastax/php-driver.git
-cd php-driver
-git submodule update --init
-vagrant up
-vagrant ssh
+git clone --recursive https://github.com/gold-development/cassandra-php-driver.git
+cd cassandra-php-driver
+docker build . -t cassandra-php-driver --build-arg CI=1
 ```
 
-Once you've logged in to the vagrant VM, run:
-
-```bash
-cd /usr/local/src/php-driver
-./bin/behat
-./bin/phpunit
-```
+The unit suite (`bin/phpunit --testsuite unit`) runs as part of the image
+build and fails it on any failure. The Behat suite needs a live Cassandra
+cluster (`ccm`) and is not runnable inside `docker build`; run it in a
+container started from the image instead, against a cluster you provide.
 
 ## Copyright
 
-&copy; DataStax, Inc.
+&copy; DataStax, Inc. Contains modifications by Gold Development to keep the
+driver building on current PHP versions.
 
 Licensed under the Apache License, Version 2.0 (the “License”); you may not use
 this file except in compliance with the License. You may obtain a copy of the
@@ -140,22 +181,14 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the
 specific language governing permissions and limitations under the License.
 
 [Apache Cassandra]: http://cassandra.apache.org
-[DSE PHP driver]: http://docs.datastax.com/en/developer/php-driver-dse/latest
-[DataStax Enterprise]: http://www.datastax.com/products/datastax-enterprise
 [DataStax C/C++ Driver for Apache Cassandra]: http://docs.datastax.com/en/developer/cpp-driver/latest
-[DataStax download server]: http://downloads.datastax.com/php-driver
-[GitHub]: https://github.com/datastax/php-driver
+[upstream]: https://github.com/datastax/php-driver
+[Releases]: https://github.com/gold-development/cassandra-php-driver/releases
+[build-windows]: https://github.com/gold-development/cassandra-php-driver/actions/workflows/build-windows.yml
+[Issues]: https://github.com/gold-development/cassandra-php-driver/issues
+[PIE]: https://github.com/php/pie
 [Home]: http://docs.datastax.com/en/developer/php-driver/latest
 [API]: http://docs.datastax.com/en/developer/php-driver/latest/api
-[installing-details]: https://github.com/datastax/php-driver/blob/master/ext/README.md
 [contribution-policy]: https://github.com/datastax/php-driver/blob/master/CONTRIBUTING.md
 [Behat Framework]: http://docs.behat.org
 [Features]: /features
-[`duration`]: /features/duration.feature
-[simple string]: /features/simple_string_queries.feature
-[`tinyint` and `smallint`]: /features/datatypes.feature#L92
-[`date`]: /features/datatypes.feature#L135
-[`time`]: /features/datatypes.feature#L170
-[user-defined function and aggregate]: /features/function_and_aggregate_metadata.feature
-[secondary index]: /features/secondary_index_metadata.feature
-[materialized view]: /features/materialized_view_metadata.feature
