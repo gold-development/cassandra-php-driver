@@ -77,11 +77,7 @@ static int
 to_string(zval *result, php_driver_time *time TSRMLS_DC)
 {
   char *string;
-#ifdef WIN32
-  spprintf(&string, 0, "%I64d", (long long int) time->time);
-#else
-  spprintf(&string, 0, "%lld", (long long int) time->time);
-#endif
+  spprintf(&string, 0, LL_FORMAT, (long long int) time->time);
   PHP5TO7_ZVAL_STRING(result, string);
   efree(string);
   return SUCCESS;

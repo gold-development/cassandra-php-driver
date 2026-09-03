@@ -221,11 +221,7 @@ PHP_METHOD(ExecutionOptions, __get)
     if (self->timestamp == INT64_MIN) {
       RETURN_NULL();
     }
-#ifdef WIN32
-    spprintf(&string, 0, "%I64d", (long long int) self->timestamp);
-#else
-    spprintf(&string, 0, "%lld", (long long int) self->timestamp);
-#endif
+    spprintf(&string, 0, LL_FORMAT, (long long int) self->timestamp);
     PHP5TO7_RETVAL_STRING(string);
     efree(string);
   }

@@ -36,11 +36,11 @@ typedef int pid_t;
 #include <process.h>
 #endif
 
-#ifdef WIN32
-#  define LL_FORMAT "%I64d"
-#else
-#  define LL_FORMAT "%lld"
-#endif
+/* Every user of this is a PHP side formatter (spprintf, or the vspprintf
+ * behind zend_throw_exception_ex), not the C runtime. Those implement %lld on
+ * every platform but not the MSVC %I64d extension, which they emit verbatim,
+ * so a Windows build printed the specifier instead of the number. */
+#define LL_FORMAT "%lld"
 
 #if PHP_VERSION_ID < 50600
 #  error PHP 5.6.0 or later is required in order to build the driver
