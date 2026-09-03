@@ -628,7 +628,12 @@ function writeClassAlias($file, $class) {
     fwrite($file, "// The extension registers this class as " . chr(92) . $prefix . $shortName . ", which PHP" . PHP_EOL);
     fwrite($file, "// refuses to accept as a declaration, so the stub is named " . $stubName . " and" . PHP_EOL);
     fwrite($file, "// aliased here. Write " . chr(92) . $prefix . $shortName . " in code; " . $stubName . " does not exist at runtime." . PHP_EOL);
-    fwrite($file, "class_alias('" . $prefix . $stubName . "', '" . $prefix . $shortName . "');" . PHP_EOL);
+    fwrite($file, "//" . PHP_EOL);
+    fwrite($file, "// The alias is deliberately unreachable: class_alias() rejects a reserved" . PHP_EOL);
+    fwrite($file, "// name just as a declaration does, and these stubs are only ever parsed." . PHP_EOL);
+    fwrite($file, "if (false) {" . PHP_EOL);
+    fwrite($file, "    class_alias('" . $prefix . $stubName . "', '" . $prefix . $shortName . "');" . PHP_EOL);
+    fwrite($file, "}" . PHP_EOL);
 }
 
 function writeClass($doc, $file, $class) {

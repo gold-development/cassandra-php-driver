@@ -84,4 +84,9 @@ interface Function_
 // The extension registers this class as \Cassandra\Function, which PHP
 // refuses to accept as a declaration, so the stub is named Function_ and
 // aliased here. Write \Cassandra\Function in code; Function_ does not exist at runtime.
-class_alias('Cassandra\Function_', 'Cassandra\Function');
+//
+// The alias is deliberately unreachable: class_alias() rejects a reserved
+// name just as a declaration does, and these stubs are only ever parsed.
+if (false) {
+    class_alias('Cassandra\Function_', 'Cassandra\Function');
+}
