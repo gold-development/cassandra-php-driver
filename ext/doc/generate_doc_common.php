@@ -175,6 +175,9 @@ class YamlClassDoc {
         $yamlFileName = preg_replace("/(.+)\.c$/", "$1.yaml", $fileName);
         $fileName = substr($fileName, strlen($dirName));
         $fileName = preg_replace("/(.+)\.c$/", "$1", $fileName);
+        // The directory iterator yields native separators, so normalise them
+        // before the path is turned into a class name.
+        $fileName = str_replace(DIRECTORY_SEPARATOR, "/", $fileName);
 
         if ($fileName == "/Core") {
             $fileName = "/" . INPUT_NAMESPACE;

@@ -72,6 +72,12 @@ function replaceKeyword($string) {
     return $string;
 }
 
+function splitDocLines($comment) {
+    // YAML doc comments are always LF terminated, whatever platform the
+    // generator runs on, so splitting on PHP_EOL breaks doc output on Windows.
+    return preg_split("/\R/", $comment);
+}
+
 function trimEmptyLines(&$lines) {
     while ($lines && strlen(trim($lines[0])) == 0) {
         array_pop($lines);
@@ -79,6 +85,121 @@ function trimEmptyLines(&$lines) {
     while ($lines && strlen(trim($lines[count($lines) - 1])) == 0) {
         array_pop($lines);
     }
+}
+
+/**
+ * Whether a documented type can be written as a native type declaration.
+ *
+ * The extension is loaded while generating, so an unknown name means the
+ * documentation is wrong; the type is then left to the @param/@return tag
+ * rather than being baked into a signature that resolves to nothing.
+ */
+function declaredTypeExists($name) {
+    $name = ltrim($name, chr(92));
+
+    if (class_exists($name) || interface_exists($name)) {
+        return true;
+    }
+
+    // Names the parser reserves are suffixed in the stubs (Float_, Function_).
+    $unsuffixed = preg_replace("/_$/", "", $name);
+
+    return $unsuffixed !== $name &&
+        (class_exists($unsuffixed) || interface_exists($unsuffixed));
+}
+
+/**
+ * Turn a documented type into something that can be written as a native type
+ * declaration, or "" when it cannot be expressed as one.
+ *
+ * Union types are supported since PHP 8.0, so "string|Statement" is emitted
+ * as-is instead of being dropped. Anything the parser would reject (array
+ * shapes, "Type[]", "callable(int): void", ...) yields "" so the signature
+ * stays untyped and the @param tag remains the only source of the type.
+ */
+function normalizeDeclaredType($type, $isReturn) {
+    $type = trim($type);
+    if ($type === "") {
+        return "";
+    }
+
+    $parts = preg_split("/\s*\|\s*/", $type, -1, PREG_SPLIT_NO_EMPTY);
+    $names = array();
+    $seen = array();
+    $nullable = false;
+
+    foreach ($parts as $part) {
+        // Must be a plain (optionally namespace qualified) type name; array
+        // shapes, generics and callable signatures cannot be declared.
+        foreach (explode("\\", ltrim($part, "\\")) as $segment) {
+            if (!preg_match("/^[A-Za-z_][A-Za-z0-9_]*$/", $segment)) {
+                return "";
+            }
+        }
+
+        $lower = strtolower($part);
+
+        // "mixed" already covers everything and may not appear in a union.
+        if ($lower === "mixed") {
+            return "mixed";
+        }
+
+        // Only meaningful as a lone return type.
+        if (($lower === "void" || $lower === "never" || $lower === "static") &&
+            (!$isReturn || count($parts) > 1)) {
+            return "";
+        }
+
+        if ($lower === "null") {
+            $nullable = true;
+            continue;
+        }
+
+        if (isset($seen[$lower])) {
+            continue;
+        }
+
+        if (!in_array($lower, array("int", "float", "string", "bool", "array",
+                "object", "callable", "iterable", "self", "parent", "false",
+                "void", "never", "static",
+                "true"), true) && !declaredTypeExists($part)) {
+            logWarning("Documented type '$part' does not exist, leaving it out of the signature");
+            return "";
+        }
+
+        $seen[$lower] = true;
+        $names[] = $part;
+    }
+
+    // A standalone "null" type declaration needs PHP 8.2, so skip it.
+    if (!$names) {
+        return "";
+    }
+
+    if ($nullable) {
+        $names[] = "null";
+    }
+
+    return implode("|", $names);
+}
+
+/**
+ * Widen a type declaration so it also accepts null, for parameters that
+ * default to null.
+ */
+function makeTypeNullable($type) {
+    $type = trim($type);
+    if ($type === "" || strtolower($type) === "mixed" || $type[0] === "?") {
+        return $type;
+    }
+
+    foreach (preg_split("/\|/", $type) as $part) {
+        if (strtolower(trim($part)) === "null") {
+            return $type;
+        }
+    }
+
+    return strpos($type, "|") !== false ? "$type|null" : "?$type";
 }
 
 function parseDocMetadata($doc, $className, $methodName, &$parameterName = null) {
@@ -101,10 +222,7 @@ function parseDocMetadata($doc, $className, $methodName, &$parameterName = null)
     }
 
     $type = is_array($metadata) && array_key_exists('type', $metadata) ? "{$metadata['type']}" : "";
-
-    if (strpos($type, "|") !== false) {
-        return "";
-    }
+    $type = normalizeDeclaredType($type, is_null($parameterName));
 
     if (!is_null($parameterName)) {
         $type = "$type ";
@@ -124,13 +242,13 @@ function writeCommentLines($file, $lines, $indent) {
 }
 
 function writeCommentDoc($file, $comment, $indent = 0) {
-    $lines = explode(PHP_EOL, $comment);
+    $lines = splitDocLines($comment);
     trimEmptyLines($lines);
     writeCommentLines($file, $lines, $indent);
 }
 
 function writeParamReturnCommentDoc($file, $typeAndName, $comment) {
-    $lines = explode(PHP_EOL, $comment);
+    $lines = splitDocLines($comment);
     if (strlen(end($lines)) == 0) {
         array_pop($lines);
     }
@@ -257,7 +375,7 @@ function writeMethodCommentDoc($file, $comment, &$throws, &$sees) {
     $lines = array();
 
     $currentList = &$lines;
-    foreach (explode(PHP_EOL, $comment) as $commentLine) {
+    foreach (splitDocLines($comment) as $commentLine) {
         if (preg_match("/@throws/", $commentLine)) {
             $currentList = &$throws;
         } else if (preg_match("/@see/", $commentLine)) {
@@ -335,6 +453,46 @@ function writeMethodDoc($doc, $file, $class, $method) {
     fwrite($file, INDENT . DOC_COMMENT_FOOTER);
 }
 
+/**
+ * The return type declaration documented for this method on a parent class or
+ * an implemented interface, or null when the method is not inherited from a
+ * documented class.
+ *
+ * YamlClassDoc::getParentReturnDoc() deliberately skips "mixed" and
+ * undocumented returns because it exists to fill in missing documentation;
+ * signature compatibility has to consider them too.
+ */
+function inheritedReturnType($class, $methodName) {
+    $classDocs = YamlClassDoc::getClassDocs();
+    $methodName = preg_replace("/_$/", "", $methodName);
+
+    $ancestors = array();
+    for ($parent = $class->getParentClass(); $parent; $parent = $parent->getParentClass()) {
+        $ancestors[] = $parent;
+    }
+    foreach ($class->getInterfaces() as $interface) {
+        $ancestors[] = $interface;
+    }
+
+    foreach ($ancestors as $ancestor) {
+        $ancestorName = $ancestor->getName();
+        if (!isset($classDocs[$ancestorName])) {
+            continue;
+        }
+
+        $ancestorDoc = $classDocs[$ancestorName]->getDoc();
+        if (!isset($ancestorDoc["methods"][$methodName]["return"]["type"])) {
+            continue;
+        }
+
+        $type = normalizeDeclaredType($ancestorDoc["methods"][$methodName]["return"]["type"], true);
+
+        return $type === "" ? "" : ": $type";
+    }
+
+    return null;
+}
+
 function writeMethod($doc, $file, $class, $method, &$singleEOL) {
     if (doesParentHaveMethod($class, $method) &&
         ($method->isStatic() || $method->isFinal())) {
@@ -397,8 +555,11 @@ function writeMethod($doc, $file, $class, $method, &$singleEOL) {
                 $parameterName = "$parameterName = $defaultValue";
             }
             // https://php.watch/versions/8.4/implicitly-marking-parameter-type-nullable-deprecated
-            if ($parameterType && rtrim($parameterType) !== 'mixed' && $defaultValue === 'null') {
-                $parameterType = "?$parameterType";
+            if ($parameterType && $defaultValue === 'null') {
+                $parameterType = makeTypeNullable($parameterType);
+                if ($parameterType !== "") {
+                    $parameterType = "$parameterType ";
+                }
             }
             fwrite($file, "$parameterType\$$parameterName");
         }
@@ -406,6 +567,14 @@ function writeMethod($doc, $file, $class, $method, &$singleEOL) {
     }
 
     $returnType = parseDocMetadata($doc, $className, $methodName);
+
+    // An inherited method must stay signature compatible with the one it
+    // overrides. The documented types are written independently per class, so
+    // fall back to the inherited declaration whenever the two disagree.
+    $inheritedReturnType = inheritedReturnType($class, $methodName);
+    if ($inheritedReturnType !== null && $inheritedReturnType !== $returnType) {
+        $returnType = $inheritedReturnType;
+    }
     if ($class->isInterface() || $method->isAbstract()) {
         fwrite($file, ")$returnType;");
     } else {
