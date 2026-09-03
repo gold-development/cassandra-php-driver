@@ -10,7 +10,7 @@ FutureSession:
       params:
         timeout:
           comment: ""
-          type: int|double|null
+          type: int|float|null
       return:
         comment: A connected session
         type: \Cassandra\Session

@@ -11,7 +11,7 @@ FuturePreparedStatement:
       params:
         timeout:
           comment: ""
-          type: int|double|null
+          type: int|float|null
       return:
         comment: A prepared statement
         type: \Cassandra\PreparedStatement

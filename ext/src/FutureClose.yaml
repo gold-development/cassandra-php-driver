@@ -10,7 +10,7 @@ FutureClose:
       params:
         timeout:
           comment: ""
-          type: int|double|null
+          type: int|float|null
       return:
         comment: Nothing
         type: void

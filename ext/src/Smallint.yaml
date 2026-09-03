@@ -17,7 +17,7 @@ Smallint:
       params:
         value:
           comment: The value as an integer, double or string
-          type: int|double|string
+          type: int|float|string
     add:
       comment: ""
       params:

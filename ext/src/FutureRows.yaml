@@ -10,7 +10,7 @@ FutureRows:
       params:
         timeout:
           comment: ""
-          type: int|double|null
+          type: int|float|null
       return:
         comment: The result set
         type: \Cassandra\Rows|null

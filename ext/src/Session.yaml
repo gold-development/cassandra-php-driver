@@ -104,7 +104,7 @@ Session:
       comment: Get a snapshot of the cluster's current schema.
       return:
         comment: A snapshot of the cluster's schema.
-        type: \Cassandra\DefaultSchema
+        type: \Cassandra\Schema
     metrics:
       comment: Get performance and diagnostic metrics.
       return:

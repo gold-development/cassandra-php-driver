@@ -24,7 +24,7 @@ UserTypeValue:
       params:
         name:
           comment: String of the field name
-          type: sting
+          type: string
         value:
           comment: A value or null
           type: mixed

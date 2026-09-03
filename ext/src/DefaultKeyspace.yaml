@@ -58,7 +58,7 @@ DefaultKeyspace:
           type: string
       return:
         comment: ""
-        type: \Cassandra\MaterizedView|null
+        type: \Cassandra\MaterializedView|null
     materializedViews:
       comment: ""
       return:

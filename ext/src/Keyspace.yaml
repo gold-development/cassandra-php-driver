@@ -30,7 +30,7 @@ Keyspace:
           type: string
       return:
         comment: Table instance or null
-        type: \Cassandra\DefaultTable|null
+        type: \Cassandra\Table|null
     tables:
       comment: Returns all tables defined in this keyspace
       return:
@@ -58,7 +58,7 @@ Keyspace:
           type: string
       return:
         comment: A materialized view or null
-        type: \Cassandra\MaterizedView|null
+        type: \Cassandra\MaterializedView|null
     materializedViews:
       comment: Gets all materialized views
       return:

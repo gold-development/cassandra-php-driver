@@ -7,7 +7,7 @@ FutureValue:
       params:
         timeout:
           comment: ""
-          type: int|double|null
+          type: int|float|null
       return:
         comment: A value
         type: mixed

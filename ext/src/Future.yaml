@@ -17,7 +17,7 @@ Future:
       params:
         timeout:
           comment: A timeout in seconds
-          type: int|double|null
+          type: int|float|null
       return:
         comment: a value that the future has been resolved with
         type: mixed
