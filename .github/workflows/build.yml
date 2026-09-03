@@ -14,3 +14,21 @@ jobs:
         with:
           submodules: true
       - run: make
+
+      # ext/doc is generated from the documentation in ext/src by reflecting
+      # over the loaded extension, so it can only be checked where the
+      # extension exists. The image has it, along with ext-yaml. Note that
+      # generate_doc.sh is not usable here: it points extension_dir at
+      # ext/modules, which the image removes on its way out, while the
+      # extension it installed is loaded from conf.d anyway.
+      - name: Stubs match the documentation
+        run: |
+          docker run --rm -v "$PWD/ext/doc:/tmp/cassandra-php-driver/ext/doc" cassandra-php-driver php ext/doc/generate_doc.php ext
+          # A class newly documented in ext/src produces an untracked stub, which
+          # a diff alone would not notice.
+          if [ -n "$(git status --porcelain -- ext/doc)" ]; then
+            echo "::error::ext/doc no longer matches ext/src. Regenerate it with 'make && make run' and commit the result."
+            git status --short -- ext/doc
+            git diff -- ext/doc
+            exit 1
+          fi
