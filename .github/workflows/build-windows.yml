@@ -62,6 +62,39 @@ jobs:
         env:
           PHP_SRC_TAG: ${{ steps.php.outputs.phptag }}
 
+      # The DLL is only known to work once something has loaded it. Everything it
+      # needs is linked statically, so the extension is the only file to place.
+      - name: Set up a PHP to test against
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring
+          tools: composer
+        env:
+          phpts: ${{ matrix.ts }}
+
+      - name: Load the extension
+        shell: pwsh
+        run: |
+          $dll = Get-ChildItem artifacts\*.dll | Select-Object -First 1
+          if (-not $dll) { throw "no extension was built" }
+
+          $extensionDir = php -r "echo ini_get('extension_dir');"
+          Copy-Item $dll.FullName (Join-Path $extensionDir 'php_cassandra.dll') -Force
+          Add-Content -Path (php -r "echo php_ini_loaded_file();") -Value 'extension=php_cassandra'
+
+          if (-not (php -m | Select-String -Quiet '^cassandra$')) {
+            php -m
+            throw "the extension did not load"
+          }
+          php -r "printf('cassandra %s on PHP %s %s', (new ReflectionExtension('cassandra'))->getVersion(), PHP_VERSION, PHP_ZTS ? 'ts' : 'nts');"
+
+      - name: Unit tests
+        shell: pwsh
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          php bin/phpunit --stop-on-error --stop-on-failure --testsuite unit
+
       - uses: actions/upload-artifact@v7
         with:
           name: php_cassandra-${{ matrix.php }}-${{ matrix.ts }}-vs17-x64
