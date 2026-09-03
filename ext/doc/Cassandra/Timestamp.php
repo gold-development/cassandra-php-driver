@@ -63,7 +63,7 @@ final class Timestamp implements \Stringable, Value
      *
      * @see microtime
      */
-    public function microtime(?bool $get_as_float = null)
+    public function microtime(?bool $get_as_float = null): float|string
     {
     }
 

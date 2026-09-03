@@ -58,7 +58,7 @@ final class BatchStatement implements Statement
      *
      * @return \Cassandra\BatchStatement self
      */
-    public function add($statement, $arguments = null): \Cassandra\BatchStatement
+    public function add(string|\Cassandra\Statement $statement, array|null $arguments = null): \Cassandra\BatchStatement
     {
     }
 }

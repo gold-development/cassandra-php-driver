@@ -28,7 +28,7 @@ final class Time implements \Stringable, Value
      *
      * @param int|string $nanoseconds Number of nanoseconds since last microsecond
      */
-    public function __construct($nanoseconds = null)
+    public function __construct(int|string|null $nanoseconds = null)
     {
     }
 

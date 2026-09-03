@@ -88,7 +88,7 @@ final class Builder
      *
      * @return \Cassandra\SSLOptions\Builder self
      */
-    public function withPrivateKey(string $path, $passphrase = null): \Cassandra\SSLOptions\Builder
+    public function withPrivateKey(string $path, string|null $passphrase = null): \Cassandra\SSLOptions\Builder
     {
     }
 }

@@ -53,12 +53,12 @@ final class UserTypeValue implements Value, \Countable, \Iterator
     /**
      * Sets the value at name in this user type value.
      *
-     * @param sting $name String of the field name
+     * @param string $name String of the field name
      * @param mixed $value A value or null
      *
      * @return void
      */
-    public function set(sting $name, mixed $value = null): void
+    public function set(string $name, mixed $value = null): void
     {
     }
 

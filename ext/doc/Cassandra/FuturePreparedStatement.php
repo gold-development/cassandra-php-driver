@@ -29,14 +29,14 @@ final class FuturePreparedStatement implements Future
     /**
      * Waits for a given future resource to resolve and throws errors if any.
      *
-     * @param int|double|null $timeout A timeout in seconds
+     * @param int|float|null $timeout A timeout in seconds
      *
      * @throws Exception\InvalidArgumentException
      * @throws Exception\TimeoutException
      *
      * @return \Cassandra\PreparedStatement A prepared statement
      */
-    public function get($timeout = null): \Cassandra\PreparedStatement
+    public function get(int|float|null $timeout = null): mixed
     {
     }
 }

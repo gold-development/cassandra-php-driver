@@ -31,12 +31,12 @@ interface Future
     /**
      * Waits for a given future resource to resolve and throws errors if any.
      *
-     * @param int|double|null $timeout A timeout in seconds
+     * @param int|float|null $timeout A timeout in seconds
      *
      * @throws Exception\InvalidArgumentException
      * @throws Exception\TimeoutException
      *
      * @return mixed a value that the future has been resolved with
      */
-    public function get($timeout = null): mixed;
+    public function get(int|float|null $timeout = null): mixed;
 }

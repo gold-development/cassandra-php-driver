@@ -53,7 +53,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withDefaultPageSize($pageSize): \Cassandra\Cluster\Builder
+    public function withDefaultPageSize(int|null $pageSize): \Cassandra\Cluster\Builder
     {
     }
 
@@ -65,7 +65,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withDefaultTimeout($timeout): \Cassandra\Cluster\Builder
+    public function withDefaultTimeout(float|null $timeout): \Cassandra\Cluster\Builder
     {
     }
 
@@ -329,7 +329,7 @@ final class Builder
      *
      * @return \Cassandra\Cluster\Builder self
      */
-    public function withTCPKeepalive($delay): \Cassandra\Cluster\Builder
+    public function withTCPKeepalive(float|null $delay): \Cassandra\Cluster\Builder
     {
     }
 

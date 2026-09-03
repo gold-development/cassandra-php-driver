@@ -28,14 +28,14 @@ final class FutureClose implements Future
     /**
      * Waits for a given future resource to resolve and throws errors if any.
      *
-     * @param int|double|null $timeout A timeout in seconds
+     * @param int|float|null $timeout A timeout in seconds
      *
      * @throws Exception\InvalidArgumentException
      * @throws Exception\TimeoutException
      *
      * @return void Nothing
      */
-    public function get($timeout = null): void
+    public function get(int|float|null $timeout = null): mixed
     {
     }
 }

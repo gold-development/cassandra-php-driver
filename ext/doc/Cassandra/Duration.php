@@ -24,11 +24,11 @@ namespace Cassandra;
 final class Duration implements \Stringable, Value
 {
     /**
-     * @param long|double|string|\Cassandra\Bigint $months Months attribute of the duration.
-     * @param long|double|string|\Cassandra\Bigint $days Days attribute of the duration.
-     * @param long|double|string|\Cassandra\Bigint $nanos Nanos attribute of the duration.
+     * @param int|float|string|\Cassandra\Bigint $months Months attribute of the duration.
+     * @param int|float|string|\Cassandra\Bigint $days Days attribute of the duration.
+     * @param int|float|string|\Cassandra\Bigint $nanos Nanos attribute of the duration.
      */
-    public function __construct($months, $days, $nanos)
+    public function __construct(int|float|string|\Cassandra\Bigint $months, int|float|string|\Cassandra\Bigint $days, int|float|string|\Cassandra\Bigint $nanos)
     {
     }
 

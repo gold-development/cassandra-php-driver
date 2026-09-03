@@ -45,7 +45,7 @@ final class Rows implements \Countable, \Iterator
      *
      * @return \Cassandra\Rows|null loads and returns next result page
      */
-    public function nextPage($timeout = null)
+    public function nextPage(float|null $timeout = null): \Cassandra\Rows|null
     {
     }
 
@@ -72,7 +72,7 @@ final class Rows implements \Countable, \Iterator
      *
      * @return array|null returns first row if any
      */
-    public function first()
+    public function first(): array|null
     {
     }
 
@@ -164,7 +164,7 @@ final class Rows implements \Countable, \Iterator
      *
      * @see \ArrayAccess::offsetGet()
      */
-    public function offsetGet(int $offset)
+    public function offsetGet(int $offset): array|null
     {
     }
 

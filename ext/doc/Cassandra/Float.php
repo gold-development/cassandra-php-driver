@@ -28,7 +28,7 @@ final class Float_ implements \Stringable, Value, Numeric
      *
      * @param float|int|string|\Cassandra\Float_ $value A float value as a string, number or Float
      */
-    public function __construct($value)
+    public function __construct(float|int|string|\Cassandra\Float_ $value)
     {
     }
 

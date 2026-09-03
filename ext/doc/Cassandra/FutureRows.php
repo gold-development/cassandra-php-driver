@@ -28,14 +28,14 @@ final class FutureRows implements Future
     /**
      * Waits for a given future resource to resolve and throws errors if any.
      *
-     * @param int|double|null $timeout A timeout in seconds
+     * @param int|float|null $timeout A timeout in seconds
      *
      * @throws Exception\InvalidArgumentException
      * @throws Exception\TimeoutException
      *
      * @return \Cassandra\Rows|null The result set
      */
-    public function get($timeout = null)
+    public function get(int|float|null $timeout = null): mixed
     {
     }
 }

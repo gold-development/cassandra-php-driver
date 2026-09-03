@@ -28,7 +28,7 @@ final class DefaultSchema implements Schema
      *
      * @param string $name Name of the keyspace to get
      *
-     * @return \Cassandra\Keyspace
+     * @return \Cassandra\Keyspace Keyspace instance or null
      */
     public function keyspace(string $name): \Cassandra\Keyspace
     {

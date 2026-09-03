@@ -66,7 +66,7 @@ final class DefaultKeyspace implements Keyspace
      *
      * @return \Cassandra\Table
      */
-    public function table(string $name): \Cassandra\Table
+    public function table(string $name): \Cassandra\Table|null
     {
     }
 
@@ -86,7 +86,7 @@ final class DefaultKeyspace implements Keyspace
      *
      * @return \Cassandra\Type\UserType|null A user type or null
      */
-    public function userType(string $name)
+    public function userType(string $name): \Cassandra\Type\UserType|null
     {
     }
 
@@ -104,9 +104,9 @@ final class DefaultKeyspace implements Keyspace
      *
      * @param string $name Materialized view name
      *
-     * @return \Cassandra\MaterizedView|null A materialized view or null
+     * @return \Cassandra\MaterializedView|null A materialized view or null
      */
-    public function materializedView(string $name)
+    public function materializedView(string $name): \Cassandra\MaterializedView|null
     {
     }
 
@@ -127,7 +127,7 @@ final class DefaultKeyspace implements Keyspace
      *
      * @return \Cassandra\Function_|null A function or null
      */
-    public function function(string $name, ...$params)
+    public function function(string $name, ...$params): \Cassandra\Function_|null
     {
     }
 
@@ -148,7 +148,7 @@ final class DefaultKeyspace implements Keyspace
      *
      * @return \Cassandra\Aggregate|null An aggregate or null
      */
-    public function aggregate(string $name, ...$params)
+    public function aggregate(string $name, ...$params): \Cassandra\Aggregate|null
     {
     }
 

@@ -26,9 +26,9 @@ final class Tinyint implements \Stringable, Value, Numeric
     /**
      * Creates a new 8-bit signed integer.
      *
-     * @param int|double|string $value The value as an integer, double or string
+     * @param int|float|string $value The value as an integer, double or string
      */
-    public function __construct($value)
+    public function __construct(int|float|string $value)
     {
     }
 

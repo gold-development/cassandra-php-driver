@@ -48,7 +48,7 @@ final class DefaultSession implements Session
      *
      * @return \Cassandra\Rows A collection of rows.
      */
-    public function execute($statement, $options = null): \Cassandra\Rows
+    public function execute(string|\Cassandra\Statement $statement, array|\Cassandra\ExecutionOptions|null $options = null): \Cassandra\Rows
     {
     }
 
@@ -63,7 +63,7 @@ final class DefaultSession implements Session
      *
      * @see \Cassandra\Session::execute() for valid execution options
      */
-    public function executeAsync($statement, $options = null): \Cassandra\FutureRows
+    public function executeAsync(string|\Cassandra\Statement $statement, array|\Cassandra\ExecutionOptions|null $options = null): \Cassandra\FutureRows
     {
     }
 
@@ -79,7 +79,7 @@ final class DefaultSession implements Session
      *
      * @see \Cassandra\Session::execute() for valid execution options
      */
-    public function prepare(string $cql, $options = null): \Cassandra\PreparedStatement
+    public function prepare(string $cql, array|\Cassandra\ExecutionOptions|null $options = null): \Cassandra\PreparedStatement
     {
     }
 
@@ -93,7 +93,7 @@ final class DefaultSession implements Session
      *
      * @see \Cassandra\Session::execute() for valid execution options
      */
-    public function prepareAsync(string $cql, $options = null): \Cassandra\FuturePreparedStatement
+    public function prepareAsync(string $cql, array|\Cassandra\ExecutionOptions|null $options = null): \Cassandra\FuturePreparedStatement
     {
     }
 
@@ -131,7 +131,7 @@ final class DefaultSession implements Session
     /**
      * Get a snapshot of the cluster's current schema.
      *
-     * @return \Cassandra\Schema
+     * @return \Cassandra\Schema A snapshot of the cluster's schema.
      */
     public function schema(): \Cassandra\Schema
     {

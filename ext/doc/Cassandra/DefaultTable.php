@@ -266,7 +266,7 @@ final class DefaultTable implements Table
      *
      * @return \Cassandra\Index|null An index or null
      */
-    public function index(string $name)
+    public function index(string $name): \Cassandra\Index|null
     {
     }
 
@@ -284,9 +284,9 @@ final class DefaultTable implements Table
      *
      * @param string $name Materialized view name
      *
-     * @return \Cassandra\MaterizedView|null A materialized view or null
+     * @return \Cassandra\MaterializedView|null A materialized view or null
      */
-    public function materializedView(string $name)
+    public function materializedView(string $name): \Cassandra\MaterializedView|null
     {
     }
 
