@@ -814,12 +814,6 @@ PHP_METHOD(DefaultSession, executeAsync)
   }
 }
 
-static void
-free_prepared_statement(void *future)
-{
-    cass_future_free((CassFuture*) future);
-}
-
 PHP_METHOD(DefaultSession, prepare)
 {
   zval *cql = NULL;
@@ -860,63 +854,61 @@ PHP_METHOD(DefaultSession, prepare)
   if (self->persist) {
     php5to7_zend_resource_le *le;
 
-    spprintf(&hash_key, 0, "%s%s", self->hash_key, Z_STRVAL_P(cql));
-    hash_key_len = spprintf(&hash_key, 0, "%s:prepared_statement:%s",
-                            hash_key, SAFE_STR(self->keyspace));
+    hash_key_len = spprintf(&hash_key, 0, "%s%s:prepared_statement:%s",
+                            SAFE_STR(self->hash_key), Z_STRVAL_P(cql),
+                            SAFE_STR(self->keyspace));
 
     if (PHP5TO7_ZEND_HASH_FIND(&EG(persistent_list), hash_key, hash_key_len + 1, le) &&
         Z_RES_P(le)->type == php_le_php_driver_prepared_statement()) {
+      /* A cache hit takes nothing from the session: the cached statement
+       * already holds its own reference to it. */
       pprepared_statement = (php_driver_pprepared_statement *) Z_RES_P(le)->ptr;
       object_init_ex(return_value, php_driver_prepared_statement_ce);
       prepared_statement = PHP_DRIVER_GET_STATEMENT(return_value);
       prepared_statement->data.prepared.prepared = cass_future_get_prepared(pprepared_statement->future);
-      self->session = php_driver_add_ref(pprepared_statement->ref);
-      future = pprepared_statement->future;
+      efree(hash_key);
+      return;
     }
   }
 
-  if (future == NULL) {
-    php5to7_zend_resource_le resource;
+  future = cass_session_prepare_n((CassSession *)self->session->data,
+                                  Z_STRVAL_P(cql), Z_STRLEN_P(cql));
 
-    future = cass_session_prepare_n((CassSession *)self->session->data,
-                                    Z_STRVAL_P(cql), Z_STRLEN_P(cql));
+  if (php_driver_future_wait_timed(future, timeout TSRMLS_CC) == SUCCESS &&
+      php_driver_future_is_error(future TSRMLS_CC) == SUCCESS) {
+    object_init_ex(return_value, php_driver_prepared_statement_ce);
+    prepared_statement = PHP_DRIVER_GET_STATEMENT(return_value);
+    prepared_statement->data.prepared.prepared = cass_future_get_prepared(future);
 
-    if (php_driver_future_wait_timed(future, timeout TSRMLS_CC) == SUCCESS &&
-            php_driver_future_is_error(future TSRMLS_CC) == SUCCESS) {
-      object_init_ex(return_value, php_driver_prepared_statement_ce);
-      prepared_statement = PHP_DRIVER_GET_STATEMENT(return_value);
-      prepared_statement->data.prepared.prepared = cass_future_get_prepared(future);
+    if (self->persist) {
+      php5to7_zend_resource_le resource;
 
-      if (self->persist) {
-          pprepared_statement = (php_driver_pprepared_statement *) pecalloc(1, sizeof(php_driver_pprepared_statement), 1);
-          pprepared_statement->ref = php_driver_new_peref(future, free_prepared_statement, 1);
-          pprepared_statement->ref = php_driver_add_ref(self->session);
-          pprepared_statement->future = future;
+      /* The cache owns the future from here on, and keeps the session alive
+       * for as long as the statement is cached; the resource's dtor releases
+       * both. */
+      pprepared_statement = (php_driver_pprepared_statement *) pecalloc(1, sizeof(php_driver_pprepared_statement), 1);
+      pprepared_statement->ref    = php_driver_add_ref(self->session);
+      pprepared_statement->future = future;
+      future = NULL;
 
-          #if PHP_MAJOR_VERSION >= 7
-                ZVAL_NEW_PERSISTENT_RES(&resource, 0, pprepared_statement, php_le_php_driver_prepared_statement());
-                PHP5TO7_ZEND_HASH_UPDATE(&EG(persistent_list), hash_key, hash_key_len + 1, &resource, sizeof(php5to7_zend_resource_le));
-                PHP_DRIVER_G(persistent_prepared_statements)++;
-          #else
-                resource.type = php_le_php_driver_prepared_statement();
-                resource.ptr = pprepared_statement;
-                PHP5TO7_ZEND_HASH_UPDATE(&EG(persistent_list), hash_key, hash_key_len + 1, resource, sizeof(php5to7_zend_resource_le));
-                PHP_DRIVER_G(persistent_prepared_statements)++;
-          #endif
-      }
+#if PHP_MAJOR_VERSION >= 7
+      ZVAL_NEW_PERSISTENT_RES(&resource, 0, pprepared_statement, php_le_php_driver_prepared_statement());
+      PHP5TO7_ZEND_HASH_UPDATE(&EG(persistent_list), hash_key, hash_key_len + 1, &resource, sizeof(php5to7_zend_resource_le));
+#else
+      resource.type = php_le_php_driver_prepared_statement();
+      resource.ptr = pprepared_statement;
+      PHP5TO7_ZEND_HASH_UPDATE(&EG(persistent_list), hash_key, hash_key_len + 1, resource, sizeof(php5to7_zend_resource_le));
+#endif
+      PHP_DRIVER_G(persistent_prepared_statements)++;
     }
   }
 
-  if (self->persist) {
-    if (php_driver_future_is_error(future TSRMLS_CC) == FAILURE) {
-      (void) PHP5TO7_ZEND_HASH_DEL(&EG(persistent_list), hash_key, hash_key_len + 1);
-    }
-    efree(hash_key);
-  }
-  else {
+  /* Not cached: a failed or timed out prepare, or a session that isn't persistent. */
+  if (future)
     cass_future_free(future);
-  }
 
+  if (hash_key)
+    efree(hash_key);
 }
 
 PHP_METHOD(DefaultSession, prepareAsync)
@@ -1152,6 +1144,10 @@ php_driver_default_session_free(php5to7_zend_object_free *object TSRMLS_DC)
   php_driver_session *self = PHP5TO7_ZEND_OBJECT_GET(session, object);
 
   php_driver_del_peref(&self->session, 1);
+  if (self->hash_key)
+    efree(self->hash_key);
+  if (self->keyspace)
+    efree(self->keyspace);
   PHP5TO7_ZVAL_MAYBE_DESTROY(self->default_timeout);
 
   zend_object_std_dtor(&self->zval TSRMLS_CC);

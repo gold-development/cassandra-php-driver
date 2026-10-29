@@ -53,8 +53,11 @@ PHP_METHOD(DefaultCluster, connect)
   session->default_consistency = self->default_consistency;
   session->default_page_size   = self->default_page_size;
   session->persist             = self->persist;
-  session->hash_key            = self->hash_key;
-  session->keyspace            = keyspace;
+  /* Copies: the cluster object, which owns hash_key, and the keyspace
+   * argument may be freed long before the session, and prepare() builds its
+   * persistent cache key from both. */
+  session->hash_key            = self->hash_key ? estrdup(self->hash_key) : NULL;
+  session->keyspace            = keyspace ? estrndup(keyspace, keyspace_len) : NULL;
 
   if (!PHP5TO7_ZVAL_IS_UNDEF(session->default_timeout)) {
     PHP5TO7_ZVAL_COPY(PHP5TO7_ZVAL_MAYBE_P(session->default_timeout),
@@ -158,8 +161,8 @@ PHP_METHOD(DefaultCluster, connectAsync)
     hash_key_len = spprintf(&hash_key, 0, "%s:session:%s",
                             self->hash_key, SAFE_STR(keyspace));
 
-    future->session_hash_key  = self->hash_key;
-    future->session_keyspace  = keyspace;
+    future->session_hash_key  = estrdup(self->hash_key);
+    future->session_keyspace  = keyspace ? estrndup(keyspace, keyspace_len) : NULL;
     future->hash_key          = hash_key;
     future->hash_key_len      = hash_key_len;
 

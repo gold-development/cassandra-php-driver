@@ -48,8 +48,10 @@ PHP_METHOD(FutureSession, get)
   object_init_ex(return_value, php_driver_default_session_ce);
   session = PHP_DRIVER_GET_SESSION(return_value);
 
-  session->session = php_driver_add_ref(self->session);
-  session->persist = self->persist;
+  session->session  = php_driver_add_ref(self->session);
+  session->persist  = self->persist;
+  session->hash_key = self->session_hash_key ? estrdup(self->session_hash_key) : NULL;
+  session->keyspace = self->session_keyspace ? estrdup(self->session_keyspace) : NULL;
 
   if (php_driver_future_wait_timed(self->future, timeout TSRMLS_CC) == FAILURE) {
     return;
@@ -120,6 +122,10 @@ php_driver_future_session_free(php5to7_zend_object_free *object TSRMLS_DC)
 
   if (self->persist) {
     efree(self->hash_key);
+    if (self->session_hash_key)
+      efree(self->session_hash_key);
+    if (self->session_keyspace)
+      efree(self->session_keyspace);
   } else {
     if (self->future) {
       cass_future_free(self->future);
@@ -148,6 +154,8 @@ php_driver_future_session_new(zend_class_entry *ce TSRMLS_DC)
   self->future            = NULL;
   self->exception_message = NULL;
   self->hash_key          = NULL;
+  self->session_hash_key  = NULL;
+  self->session_keyspace  = NULL;
   self->persist           = 0;
 
   PHP5TO7_ZVAL_UNDEF(self->default_session);
