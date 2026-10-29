@@ -265,20 +265,24 @@ if test "$PHP_CASSANDRA" != "no"; then
   PHP_ADD_LIBRARY(uv,, CASSANDRA_SHARED_LIBADD)
   PHP_ADD_LIBRARY(m,, CASSANDRA_SHARED_LIBADD)
 
+  dnl A source build installs include/cassandra.h; distribution packages
+  dnl (Fedora, Remi's EL repositories) install include/cassandra/cassandra.h.
   if test "$PHP_CASSANDRA" != "yes"; then
-    if test -f $PHP_CASSANDRA/include/cassandra.h; then
-      CPP_DRIVER_DIR=$PHP_CASSANDRA
-    fi
+    CPP_DRIVER_SEARCH=$PHP_CASSANDRA
   else
-    for i in /usr/local /usr; do
-      if test -f $i/include/cassandra.h; then
+    CPP_DRIVER_SEARCH="/usr/local /usr"
+  fi
+  for i in $CPP_DRIVER_SEARCH; do
+    for j in $i/include $i/include/cassandra; do
+      if test -z "$CPP_DRIVER_DIR" && test -f $j/cassandra.h; then
         CPP_DRIVER_DIR=$i
+        CPP_DRIVER_INCLUDE=$j
       fi
     done
-  fi
+  done
 
   AC_MSG_CHECKING([for supported DataStax C/C++ driver version])
-  PHP_CASSANDRA_FOUND_CASSANDRA_VERSION=`$AWK '/CASS_VERSION_MAJOR/ {printf $3"."} /CASS_VERSION_MINOR/ {printf $3"."} /CASS_VERSION_PATCH/ {printf $3}' $CPP_DRIVER_DIR/include/cassandra.h`
+  PHP_CASSANDRA_FOUND_CASSANDRA_VERSION=`$AWK '/CASS_VERSION_MAJOR/ {printf $3"."} /CASS_VERSION_MINOR/ {printf $3"."} /CASS_VERSION_PATCH/ {printf $3}' $CPP_DRIVER_INCLUDE/cassandra.h`
   PHP_CASSANDRA_FOUND_CASSANDRA_VERSION_NUMBER=`echo "${PHP_CASSANDRA_FOUND_CASSANDRA_VERSION}" | $AWK 'BEGIN { FS = "."; } { printf "%d", ([$]1 * 100 + [$]2) * 100 + [$]3;}'`
   if test "$PHP_CASSANDRA_FOUND_CASSANDRA_VERSION_NUMBER" -lt "20700"; then
   AC_MSG_ERROR([not supported. Driver version 2.7.0+ required (found $PHP_CASSANDRA_FOUND_CASSANDRA_VERSION)])
@@ -306,7 +310,7 @@ if test "$PHP_CASSANDRA" != "no"; then
 
   if test -n "$CPP_DRIVER_DIR"; then
     PHP_ADD_LIBPATH($CPP_DRIVER_DIR/$PHP_LIBDIR, CASSANDRA_SHARED_LIBADD)
-    PHP_ADD_INCLUDE($CPP_DRIVER_DIR/include)
+    PHP_ADD_INCLUDE($CPP_DRIVER_INCLUDE)
   fi
 
   PHP_ADD_LIBRARY(cassandra,, CASSANDRA_SHARED_LIBADD)
