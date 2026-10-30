@@ -248,7 +248,8 @@ if (PHP_CASSANDRA != "no") {
           //   crypt32 : OpenSSL CAPI engine / winstore (Cert* APIs)
           //   dbghelp : libuv process.c (Sym*, MiniDumpWriteDump)
           //   version : cpp-driver client_insights (GetFileVersionInfo*, VerQueryValue)
-          ADD_FLAG("LIBS", "gdi32.lib crypt32.lib dbghelp.lib version.lib");
+          //   synchronization : newer libuv pipe.c (WaitOnAddress, WakeByAddressSingle)
+          ADD_FLAG("LIBS", "gdi32.lib crypt32.lib dbghelp.lib version.lib synchronization.lib");
 
           AC_DEFINE("HAVE_CASSANDRA_EXT", PHP_CASSANDRA_SHARED ? 0 : 1, "Have DataStax PHP driver extension");
         } else {
